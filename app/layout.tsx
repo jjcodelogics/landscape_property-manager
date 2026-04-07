@@ -15,9 +15,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
-        <meta name="theme-color" content="#111827" />
+        <meta name="theme-color" content="#005f73" />
       </head>
-      <body className="font-sans antialiased touch-manipulation">{children}</body>
+      <body className="antialiased touch-manipulation">{children}</body>
     </html>
   );
 }

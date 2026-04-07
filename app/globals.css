@@ -1,63 +1,383 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────────────────────────
+   DonkerGroep Design Tokens
+───────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand palette */
+  --color-primary:     #005f73;
+  --color-primary-dark: #004a5a;
+  --color-primary-light: #0a9396;
+  --color-secondary:   #0a9396;
+  --color-accent:      #94d2bd;
+  --color-accent-light: #caf0e4;
+
+  /* Surfaces */
+  --color-bg:          #f0f0f0;
+  --color-surface:     #ffffff;
+  --color-surface-2:   #f8f9fa;
+  --color-border:      #e2e8f0;
+
+  /* Text */
+  --color-text:        #1a202c;
+  --color-text-muted:  #4a5568;
+  --color-text-light:  #718096;
+
+  /* Zone colours */
+  --color-zone-grass:       #6aa84f;
+  --color-zone-waste:       #3d85c6;
+  --color-zone-maintenance: #e69138;
+
+  /* Status */
+  --color-success: #38a169;
+  --color-warning: #d69e2e;
+  --color-danger:  #e53e3e;
+
+  /* Radius */
+  --radius-sm:  0.5rem;
+  --radius-md:  0.75rem;
+  --radius-lg:  1rem;
+  --radius-xl:  1.25rem;
+  --radius-2xl: 1.5rem;
+
+  /* Typography */
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Tailwind compat */
+  --background: var(--color-surface);
+  --foreground: var(--color-text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─────────────────────────────────────────────────────────────
+   Base styles
+───────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Mobile-first improvements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Safe area (notched devices)
+───────────────────────────────────────────────────────────── */
 @supports (padding: env(safe-area-inset-top)) {
   .safe-top {
     padding-top: max(env(safe-area-inset-top), 0.75rem);
   }
-  
   .safe-bottom {
     padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
   }
-  
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
-/* Smooth scrolling on mobile */
+/* ─────────────────────────────────────────────────────────────
+   Mobile touch improvements
+───────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   * {
     -webkit-tap-highlight-color: transparent;
   }
-  
   .overscroll-contain {
     overscroll-behavior: contain;
   }
 }
 
-/* Custom breakpoint for very small screens */
+/* ─────────────────────────────────────────────────────────────
+   Custom xs breakpoint (375px)
+───────────────────────────────────────────────────────────── */
 @media (min-width: 375px) {
-  .xs\:inline {
-    display: inline;
-  }
-  
-  .xs\:hidden {
-    display: none;
-  }
+  .xs\:inline { display: inline; }
+  .xs\:hidden  { display: none;   }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Global button base
+───────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-semibold);
+  font-size: 0.9375rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  min-height: 44px;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,95,115,0.3);
+}
+
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 12px rgba(0,95,115,0.4);
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background: var(--color-primary);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  background: var(--color-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Input base
+───────────────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  min-height: 44px;
+}
+
+.input:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px rgba(10,147,150,0.15);
+}
+
+.input::placeholder {
+  color: var(--color-text-light);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Card base
+───────────────────────────────────────────────────────────── */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Zone type badge colors
+───────────────────────────────────────────────────────────── */
+.badge-grass {
+  background: rgba(106,168,79,0.15);
+  color: #3d6e2a;
+}
+
+.badge-waste {
+  background: rgba(61,133,198,0.15);
+  color: #1e5d8a;
+}
+
+.badge-maintenance {
+  background: rgba(230,145,56,0.15);
+  color: #9a5c0e;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Markdown prose overrides inside sidebar
+───────────────────────────────────────────────────────────── */
+.zone-markdown h2 {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin: 1.25rem 0 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid var(--color-accent-light);
+}
+
+.zone-markdown h2:first-child {
+  margin-top: 0;
+}
+
+.zone-markdown ul {
+  padding-left: 1.25rem;
+  margin: 0.375rem 0 0.75rem;
+}
+
+.zone-markdown ul li {
+  margin-bottom: 0.25rem;
+  color: var(--color-text);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.zone-markdown p {
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  margin: 0.375rem 0;
+}
+
+.zone-markdown strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Sidebar slide animation
+───────────────────────────────────────────────────────────── */
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInBottom 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease both;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Collapsible section toggle
+───────────────────────────────────────────────────────────── */
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.625rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  touch-action: manipulation;
+}
+
+.section-toggle svg {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.section-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Quick duration buttons
+───────────────────────────────────────────────────────────── */
+.quick-time-btn {
+  flex: 1;
+  padding: 0.5rem 0.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 40px;
+  touch-action: manipulation;
+}
+
+.quick-time-btn:hover,
+.quick-time-btn:active {
+  border-color: var(--color-secondary);
+  background: rgba(10,147,150,0.08);
+  color: var(--color-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Leaflet map tile filter (subtle)
+───────────────────────────────────────────────────────────── */
+.leaflet-tile {
+  filter: saturate(0.9) brightness(1.02);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Scrollbar styling
+───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
 }
