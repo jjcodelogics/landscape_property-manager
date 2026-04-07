@@ -6,10 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import { Zone } from '@/lib/types';
 
+// DonkerGroep zone palette
 const ZONE_COLORS: Record<string, string> = {
-  grass: '#22c55e',
-  waste: '#f97316',
-  maintenance: '#3b82f6',
+  grass:       '#6aa84f',
+  waste:       '#3d85c6',
+  maintenance: '#e69138',
 };
 
 interface AdminMapProps {

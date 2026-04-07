@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Zone, TaskType } from '@/lib/types';
-import { X } from 'lucide-react';
+import { X, Scissors, Trash2, Wrench, Clock, ClipboardList } from 'lucide-react';
 
 interface TaskFormProps {
   zone: Zone;
@@ -10,18 +10,37 @@ interface TaskFormProps {
   onSuccess: () => void;
 }
 
-const TASK_TYPES: { value: TaskType; label: string }[] = [
-  { value: 'mowing', label: 'Mowing' },
-  { value: 'waste', label: 'Waste Collection' },
-  { value: 'maintenance', label: 'Maintenance' },
+const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = [
+  { value: 'mowing',      label: 'Mowing',      icon: <Scissors className="w-4 h-4" /> },
+  { value: 'waste',       label: 'Waste',        icon: <Trash2   className="w-4 h-4" /> },
+  { value: 'maintenance', label: 'Maintenance',  icon: <Wrench   className="w-4 h-4" /> },
 ];
+
+const QUICK_MINUTES = [5, 10, 15, 30, 45, 60];
+
+// Default note templates per task type
+const DEFAULT_NOTES: Record<TaskType, string> = {
+  mowing:      '',
+  waste:       '',
+  maintenance: '',
+};
 
 export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
   const [taskType, setTaskType] = useState<TaskType>('mowing');
   const [duration, setDuration] = useState('');
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(DEFAULT_NOTES.mowing);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleTaskTypeChange = (type: TaskType) => {
+    setTaskType(type);
+    setNotes(DEFAULT_NOTES[type]);
+  };
+
+  const addMinutes = (mins: number) => {
+    const current = parseInt(duration, 10) || 0;
+    setDuration(String(current + mins));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,97 +80,138 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md shadow-2xl max-h-[90vh] flex flex-col animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-black/50 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+      <div
+        className="bg-[var(--color-surface)] rounded-t-[1.5rem] sm:rounded-2xl w-full sm:max-w-md shadow-2xl max-h-[92vh] flex flex-col animate-slide-in-bottom sm:animate-fade-in"
+      >
         {/* Mobile drag handle */}
-        <div className="sm:hidden flex justify-center pt-2 pb-1">
-          <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+        <div className="sm:hidden flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 bg-[var(--color-border)] rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b flex-shrink-0">
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-5 py-4 flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--color-border)' }}
+        >
           <div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900">Log Task</h3>
-            <p className="text-sm text-gray-600 mt-0.5">{zone.name}</p>
+            <h3 className="text-lg font-bold text-[var(--color-text)]">Log Task</h3>
+            <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{zone.name}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2.5 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+            className="p-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors touch-manipulation"
+            aria-label="Close"
           >
-            <X className="w-6 h-6 text-gray-600" />
+            <X className="w-5 h-5 text-[var(--color-text-muted)]" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-5 overflow-y-auto overscroll-contain flex-1">
+        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-5 overflow-y-auto overscroll-contain flex-1">
+          {/* Task type selector */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
               Task Type
             </label>
-            <div className="grid grid-cols-3 gap-2.5">
-              {TASK_TYPES.map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => setTaskType(type.value)}
-                  className={`py-3 px-3 rounded-xl text-sm font-semibold transition-all active:scale-95 touch-manipulation min-h-[44px] ${
-                    taskType === type.value
-                      ? 'bg-green-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
-                  }`}
-                >
-                  {type.label}
-                </button>
-              ))}
+            <div className="grid grid-cols-3 gap-2">
+              {TASK_TYPES.map((type) => {
+                const active = taskType === type.value;
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => handleTaskTypeChange(type.value)}
+                    className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-sm font-semibold transition-all active:scale-95 touch-manipulation min-h-[64px] border-2 ${
+                      active
+                        ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white shadow-md'
+                        : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-secondary)] hover:text-[var(--color-secondary)]'
+                    }`}
+                  >
+                    {type.icon}
+                    <span>{type.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
+          {/* Duration */}
           <div>
             <label
               htmlFor="duration"
-              className="block text-sm font-semibold text-gray-700 mb-2"
+              className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5"
             >
               Duration (minutes)
             </label>
-            <input
-              id="duration"
-              type="number"
-              inputMode="numeric"
-              min="1"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="e.g. 45"
-              className="w-full border-2 border-gray-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all touch-manipulation"
-              required
-            />
+            {/* Quick add buttons */}
+            <div className="flex gap-1.5 mb-2.5">
+              {QUICK_MINUTES.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => addMinutes(m)}
+                  className="quick-time-btn"
+                  aria-label={`Add ${m} minutes`}
+                >
+                  +{m}
+                </button>
+              ))}
+            </div>
+            <div className="relative">
+              <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-light)] pointer-events-none" />
+              <input
+                id="duration"
+                type="number"
+                inputMode="numeric"
+                min="1"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                placeholder="Enter minutes"
+                className="input pl-10"
+                required
+              />
+            </div>
           </div>
 
+          {/* Notes */}
           <div>
             <label
               htmlFor="notes"
-              className="block text-sm font-semibold text-gray-700 mb-2"
+              className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5"
             >
-              Notes (optional)
+              Notes <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
             </label>
             <textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any additional notes..."
+              placeholder="Any observations or notes..."
               rows={3}
-              className="w-full border-2 border-gray-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 resize-none transition-all touch-manipulation"
+              className="input resize-none"
             />
           </div>
 
           {error && (
-            <p className="text-red-600 text-sm bg-red-50 p-4 rounded-xl font-medium">{error}</p>
+            <p className="text-[var(--color-danger)] text-sm bg-red-50 px-4 py-3 rounded-xl font-medium border border-red-200">
+              {error}
+            </p>
           )}
 
-          <div className="pb-safe pt-2">
+          {/* Submit */}
+          <div className="pb-safe pt-1">
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-gray-300 text-white font-bold py-4 rounded-xl transition-all text-base sm:text-lg shadow-lg active:scale-[0.98] touch-manipulation min-h-[52px]"
+              className="btn btn-primary w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : 'Save Task'}
+              {loading ? (
+                <span>Saving…</span>
+              ) : (
+                <>
+                  <ClipboardList className="w-5 h-5" />
+                  Save Task
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -159,3 +219,4 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
     </div>
   );
 }
+

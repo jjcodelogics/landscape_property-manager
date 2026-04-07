@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trash2, Edit3 } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit3, MapPin, PenSquare } from 'lucide-react';
 import { Zone, ZoneType } from '@/lib/types';
 
 const AdminMap = dynamic(() => import('@/components/AdminMap'), { ssr: false });
@@ -13,6 +13,12 @@ interface ZoneFormData {
   type: ZoneType;
   instructions: string;
 }
+
+const ZONE_TYPE_OPTIONS: { value: ZoneType; label: string; badge: string }[] = [
+  { value: 'grass',       label: 'Grass',       badge: 'badge-grass' },
+  { value: 'waste',       label: 'Waste',        badge: 'badge-waste' },
+  { value: 'maintenance', label: 'Maintenance',  badge: 'badge-maintenance' },
+];
 
 export default function AdminZonesPage() {
   const [zones, setZones] = useState<Zone[]>([]);
@@ -36,7 +42,7 @@ export default function AdminZonesPage() {
       const data = await res.json();
       setZones(Array.isArray(data) ? data : []);
     } catch {
-      // ignore – zones will remain empty
+      // ignore — zones will remain empty
     } finally {
       setLoading(false);
     }
@@ -84,10 +90,7 @@ export default function AdminZonesPage() {
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          geojson: drawnGeojson,
-        }),
+        body: JSON.stringify({ ...formData, geojson: drawnGeojson }),
       });
 
       if (!res.ok) {
@@ -122,22 +125,36 @@ export default function AdminZonesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pb-safe\">
-      {/* Mobile-optimized header */}
-      <div className="bg-white border-b px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sticky top-0 z-20 shadow-sm safe-top\">
-        <Link 
-          href="/" 
-          className="p-2.5 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+    <div className="min-h-screen flex flex-col pb-safe" style={{ background: 'var(--color-bg)' }}>
+      {/* Header */}
+      <div
+        className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3 safe-top"
+        style={{
+          background: 'var(--color-primary)',
+          boxShadow: '0 2px 12px rgba(0,95,115,0.25)',
+        }}
+      >
+        <Link
+          href="/"
+          className="p-2 rounded-full touch-manipulation flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.15)' }}
           aria-label="Back to map"
         >
-          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg sm:text-xl font-bold text-gray-900 flex-1">Zone Editor</h1>
+        <h1 className="text-lg font-bold text-white flex-1">Zone Editor</h1>
+        <div
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
+          style={{ background: 'rgba(255,255,255,0.15)' }}
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          {zones.length} zone{zones.length !== 1 ? 's' : ''}
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden\">
-        {/* Map container */}
-        <div className="relative h-64 sm:h-80 lg:h-auto lg:flex-1\">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        {/* Map */}
+        <div className="relative h-64 sm:h-80 lg:h-auto lg:flex-1">
           <AdminMap
             zones={zones}
             onPolygonDrawn={handlePolygonDrawn}
@@ -146,60 +163,87 @@ export default function AdminZonesPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 lg:border-l overflow-y-auto flex-1 lg:flex-none\">{showForm && (
-            <div className="p-4 sm:p-5 border-b bg-gray-50\">
-              <h2 className="font-bold text-gray-900 mb-4 text-base sm:text-lg\">
-                {editingZone ? 'Edit Zone' : 'New Zone'}
-              </h2>
-              <div className="space-y-4\">
+        <div
+          className="w-full lg:w-96 flex-1 lg:flex-none overflow-y-auto"
+          style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-border)' }}
+        >
+          {/* Zone form */}
+          {showForm && (
+            <div className="p-5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <PenSquare className="w-4 h-4 text-[var(--color-primary)]" />
+                <h2 className="font-bold text-[var(--color-text)]">
+                  {editingZone ? 'Edit Zone' : 'New Zone'}
+                </h2>
+              </div>
+
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2\">Name</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Name
+                  </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
-                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all touch-manipulation"
-                    placeholder="Zone name"
+                    className="input"
+                    placeholder="e.g. North Entrance Lawn"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2\">Type</label>
-                  <select
-                    value={formData.type}
-                    onChange={(e) => setFormData((p) => ({ ...p, type: e.target.value as ZoneType }))}
-                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all touch-manipulation appearance-none bg-white"
-                  >
-                    <option value="grass">Grass</option>
-                    <option value="waste">Waste</option>
-                    <option value="maintenance">Maintenance</option>
-                  </select>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Zone Type
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {ZONE_TYPE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setFormData((p) => ({ ...p, type: opt.value }))}
+                        className={`py-2.5 px-3 rounded-xl text-sm font-semibold border-2 transition-all active:scale-95 touch-manipulation ${
+                          formData.type === opt.value
+                            ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-secondary)]'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2\">
-                    Instructions (Markdown supported)
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Instructions{' '}
+                    <span className="normal-case font-normal text-[var(--color-text-light)]">(Markdown supported)</span>
                   </label>
                   <textarea
                     value={formData.instructions}
                     onChange={(e) => setFormData((p) => ({ ...p, instructions: e.target.value }))}
-                    className="w-full border-2 border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 resize-none transition-all touch-manipulation"
-                    placeholder="Enter instructions using Markdown..."
-                    rows={4}
+                    className="input resize-none"
+                    placeholder="## Tasks&#10;- Task 1&#10;&#10;## Notes&#10;- Note 1"
+                    rows={5}
                   />
                 </div>
+
                 {error && (
-                  <p className="text-red-600 text-sm bg-red-50 p-4 rounded-xl font-medium\">{error}</p>
+                  <p className="text-[var(--color-danger)] text-sm bg-red-50 px-4 py-3 rounded-xl border border-red-200 font-medium">
+                    {error}
+                  </p>
                 )}
-                <div className="flex gap-2.5\">
+
+                <div className="flex gap-2.5">
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex-1 bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-gray-300 text-white font-bold py-3.5 rounded-xl text-base transition-all active:scale-[0.98] touch-manipulation min-h-[48px]"
+                    className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {saving ? 'Saving...' : editingZone ? 'Update Zone' : 'Save Zone'}
+                    {saving ? 'Saving…' : editingZone ? 'Update Zone' : 'Save Zone'}
                   </button>
                   <button
                     onClick={() => { setShowForm(false); setDrawnGeojson(null); setEditingZone(null); }}
-                    className="px-5 py-3.5 border-2 border-gray-300 rounded-xl text-base font-semibold text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-all active:scale-[0.98] touch-manipulation"
+                    className="btn btn-ghost"
                   >
                     Cancel
                   </button>
@@ -208,55 +252,61 @@ export default function AdminZonesPage() {
             </div>
           )}
 
-          <div className="p-4 sm:p-5\">
-            <div className="flex items-center justify-between mb-4\">
-              <h2 className="font-bold text-gray-900 text-base sm:text-lg\">
-                Zones ({zones.length})
-              </h2>
-              <p className="text-xs sm:text-sm text-gray-600 font-medium\">Draw on map</p>
-            </div>
+          {/* Zone list */}
+          <div className="p-5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-4">
+              All Zones
+            </h2>
 
             {loading ? (
-              <p className="text-gray-500 text-sm text-center py-6 font-medium\">Loading...</p>
+              <p className="text-[var(--color-text-light)] text-sm text-center py-6">Loading…</p>
             ) : zones.length === 0 ? (
-              <div className="text-center py-10\">
-                <div className="text-3xl mb-2\">✏️</div>
-                <p className="text-gray-400 text-sm italic\">
+              <div className="text-center py-10">
+                <MapPin className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-light)]" />
+                <p className="text-[var(--color-text-light)] text-sm italic">
                   No zones yet. Use the draw tool on the map.
                 </p>
               </div>
             ) : (
-              <ul className="space-y-2.5\">
-                {zones.map((zone) => (
-                  <li
-                    key={zone.id}
-                    className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3.5 border-2 border-gray-200 active:bg-gray-100 transition-colors\"
-                  >
-                    <div className="min-w-0 flex-1\">
-                      <p className="font-semibold text-gray-900 text-base truncate\">{zone.name}</p>
-                      <p className="text-sm text-gray-600 capitalize mt-0.5\">{zone.type}</p>
-                    </div>
-                    <div className="flex items-center gap-1.5 ml-3\">
-                      <button
-                        onClick={() => handleEditZone(zone)}
-                        className="p-2.5 rounded-xl hover:bg-blue-100 active:bg-blue-200 text-blue-600 transition-colors touch-manipulation"
-                        title="Edit zone"
-                        aria-label={`Edit ${zone.name}`}
-                      >
-                        <Edit3 className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(zone.id)}
-                        disabled={deletingId === zone.id}
-                        className="p-2.5 rounded-xl hover:bg-red-100 active:bg-red-200 text-red-600 transition-colors disabled:opacity-50 touch-manipulation"
-                        title="Delete zone"
-                        aria-label={`Delete ${zone.name}`}
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </li>
-                ))}
+              <ul className="space-y-2">
+                {zones.map((zone) => {
+                  const badge = zone.type === 'grass' ? 'badge-grass' : zone.type === 'waste' ? 'badge-waste' : 'badge-maintenance';
+                  return (
+                    <li
+                      key={zone.id}
+                      className="flex items-center justify-between rounded-xl px-4 py-3.5 border-2 transition-colors"
+                      style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-[var(--color-text)] truncate">{zone.name}</p>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
+                          {zone.type}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 ml-3">
+                        <button
+                          onClick={() => handleEditZone(zone)}
+                          className="p-2.5 rounded-xl transition-colors touch-manipulation"
+                          style={{ color: 'var(--color-secondary)' }}
+                          title="Edit zone"
+                          aria-label={`Edit ${zone.name}`}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(zone.id)}
+                          disabled={deletingId === zone.id}
+                          className="p-2.5 rounded-xl transition-colors disabled:opacity-50 touch-manipulation"
+                          style={{ color: 'var(--color-danger)' }}
+                          title="Delete zone"
+                          aria-label={`Delete ${zone.name}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -265,3 +315,4 @@ export default function AdminZonesPage() {
     </div>
   );
 }
+
