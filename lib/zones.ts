@@ -7,6 +7,7 @@ import { Zone } from './types';
 export const HARDCODED_ZONES: Zone[] = [
   {
     id: '0EE3CPeYJzcQY8sBcpVdOvFIFHEb72No',
+    title: 'North Entrance Lawn',
     name: 'North Entrance Lawn',
     type: 'grass',
     instructions: `## Tasks
@@ -43,10 +44,13 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
   {
     id: 'PpRawkTr8lzY2eYOl6U90MfPqb5AEZ2g',
+    title: 'Main Parking Area',
     name: 'Main Parking Area',
     type: 'waste',
     instructions: `## Tasks
@@ -87,10 +91,13 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '2sXdrmK1HiS6sI1U4tShKqFXIhMHiJLk',
+    title: 'East Building Maintenance',
     name: 'East Building Maintenance',
     type: 'maintenance',
     instructions: `## Tasks
@@ -135,10 +142,13 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
   {
     id: 'DEcoKEMoCxikArLCYD8jKe0VgeL43fze',
+    title: 'Storage Yard',
     name: 'Storage Yard',
     type: 'maintenance',
     instructions: `## Tasks
@@ -177,10 +187,13 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
   {
     id: 'Kntg7nIgjZKRgC85XnaeUdvXXGrdPh83',
+    title: 'South Sports Field',
     name: 'South Sports Field',
     type: 'grass',
     instructions: `## Tasks
@@ -221,10 +234,13 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
   {
     id: 'FeEIfEQ2g7lcw0EDdjkSahYsr9nBQKO0',
+    title: 'Central Garden',
     name: 'Central Garden',
     type: 'grass',
     instructions: `## Tasks
@@ -267,6 +283,8 @@ export const HARDCODED_ZONES: Zone[] = [
         ]],
       },
     },
+    last_worked_at: null,
+    next_scheduled_work: null,
     created_at: new Date().toISOString(),
   },
 ];

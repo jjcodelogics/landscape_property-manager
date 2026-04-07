@@ -64,12 +64,12 @@ export async function PUT(
 
     // Validate and sanitize inputs
     const title = validateText(body.title, 'Title', { maxLength: 200 });
-    const name = validateText(body.name, 'Name', { maxLength: 200 });
+    const name = validateText(body.name || '', 'Name', { required: false, maxLength: 200 }) || null;
     const type = validateZoneType(body.type);
     const instructions = validateText(body.instructions || '', 'Instructions', {
       required: false,
       maxLength: 2000,
-    });
+    }) || null;
     const geojson = validateGeoJSON(body.geojson, 'GeoJSON');
     const last_worked_at = validateISODate(body.last_worked_at, 'Last worked at', { required: false });
     const next_scheduled_work = validateISODate(body.next_scheduled_work, 'Next scheduled work', { required: false });

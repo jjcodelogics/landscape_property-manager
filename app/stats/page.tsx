@@ -180,7 +180,7 @@ export default function StatsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-[var(--color-text)] truncate">
-                        {task.zones?.name || 'Unknown Zone'}
+                        {task.zones?.title || 'Unknown Zone'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TASK_TYPE_BADGE[task.task_type] || ''}`}>

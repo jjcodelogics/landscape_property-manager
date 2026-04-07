@@ -4,7 +4,7 @@ export type TaskType = 'mowing' | 'waste' | 'maintenance';
 export interface Zone {
   id: string;
   title: string;
-  name: string;
+  name: string | null;
   type: ZoneType;
   instructions: string | null;
   geojson: GeoJSON.Feature;
@@ -23,7 +23,7 @@ export interface Task {
 }
 
 export interface TaskWithZone extends Task {
-  zones?: Pick<Zone, 'id' | 'name' | 'type'>;
+  zones?: Pick<Zone, 'id' | 'title' | 'name' | 'type'>;
 }
 
 export interface ZoneStats {

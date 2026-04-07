@@ -5,7 +5,7 @@ create extension if not exists "uuid-ossp";
 create table if not exists zones (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
-  name text not null,
+  name text,
   type text not null check (type in ('grass', 'waste', 'maintenance')),
   instructions text,
   geojson jsonb not null,
