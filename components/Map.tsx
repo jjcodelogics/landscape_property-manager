@@ -25,19 +25,20 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    // Define terrain bounding box (adjusted for hardcoded zones in Netherlands)
-    const terrainBounds: L.LatLngBoundsExpression = [
-      [52.899, 6.499],  // Southwest corner
-      [52.904, 6.509],  // Northeast corner
+    // Property boundary - extracted from facility GeoJSON polygon
+    const propertyBounds: L.LatLngBoundsExpression = [
+      [52.97663782252974, 6.565499658064198],   // Southwest corner (southLat, westLng)
+      [52.98629205327026, 6.581936137427363],   // Northeast corner (northLat, eastLng)
     ];
 
     const map = L.map(mapContainerRef.current, {
-      center: [52.9015, 6.504],    // Center of the zones area
+      center: [52.9815, 6.5737],    // Center of property
       zoom: 16,
       zoomControl: true,
-      minZoom: 14,                    // Prevent zooming out too far
-      maxBounds: terrainBounds,      // Restrict panning to terrain area
-      maxBoundsViscosity: 1.0,       // Hard boundary (1.0 = cannot pan outside)
+      minZoom: 16,                     // Prevents zooming out to see the city
+      maxZoom: 20,                     // Allow detailed inspection
+      maxBounds: propertyBounds,       // Restrict panning to property boundary
+      maxBoundsViscosity: 1.0,         // Hard boundary - cannot pan outside
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

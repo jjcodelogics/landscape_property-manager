@@ -1,13 +1,13 @@
 import { Zone } from './types';
 
 /**
- * Hardcoded zones for testing map interaction before database integration.
- * These zones represent different areas of a facility in the Netherlands.
+ * Actual facility zones loaded from GeoJSON.
+ * These zones represent different areas of the facility.
  */
 export const HARDCODED_ZONES: Zone[] = [
   {
-    id: '1',
-    name: 'Main Entrance Lawn',
+    id: '0EE3CPeYJzcQY8sBcpVdOvFIFHEb72No',
+    name: 'North Entrance Lawn',
     type: 'grass',
     instructions: `## Tasks
 - Weekly mowing during growing season (April–October)
@@ -35,19 +35,19 @@ export const HARDCODED_ZONES: Zone[] = [
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [6.500, 52.900],
-          [6.502, 52.900],
-          [6.502, 52.901],
-          [6.500, 52.901],
-          [6.500, 52.900],
+          [6.5685955124618545, 52.98294148252975],
+          [6.568379347111119, 52.98243360462092],
+          [6.569043660141773, 52.982344725373025],
+          [6.569244008516705, 52.98286530122388],
+          [6.5685955124618545, 52.98294148252975]
         ]],
       },
     },
     created_at: new Date().toISOString(),
   },
   {
-    id: '2',
-    name: 'Parking North',
+    id: 'PpRawkTr8lzY2eYOl6U90MfPqb5AEZ2g',
+    name: 'Main Parking Area',
     type: 'waste',
     instructions: `## Tasks
 - Empty waste bins: Mon, Wed, Fri (7:00 AM)
@@ -75,24 +75,29 @@ export const HARDCODED_ZONES: Zone[] = [
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [6.503, 52.900],
-          [6.505, 52.900],
-          [6.505, 52.901],
-          [6.503, 52.901],
-          [6.503, 52.900],
+          [6.569093151152288, 52.98208591007733],
+          [6.569453480276053, 52.98216506431535],
+          [6.569760246962602, 52.98205366201253],
+          [6.570125445399782, 52.98214747449731],
+          [6.5700475363995, 52.98160511825563],
+          [6.569541127901914, 52.981493714508986],
+          [6.568990895590076, 52.981575801507944],
+          [6.568976287652475, 52.9818455148353],
+          [6.569093151152288, 52.98208591007733]
         ]],
       },
     },
     created_at: new Date().toISOString(),
   },
   {
-    id: '3',
-    name: 'HVAC Service Zone',
+    id: '2sXdrmK1HiS6sI1U4tShKqFXIhMHiJLk',
+    name: 'East Building Maintenance',
     type: 'maintenance',
     instructions: `## Tasks
-- Monthly filter replacements
-- Quarterly equipment inspection
+- Monthly equipment inspection
+- Quarterly deep clean
 - Check access pathway: Weekly
+- HVAC filter replacement: Monthly
 
 ## Notes
 - Restricted area; staff badge required
@@ -116,73 +121,39 @@ export const HARDCODED_ZONES: Zone[] = [
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [6.500, 52.902],
-          [6.502, 52.902],
-          [6.502, 52.903],
-          [6.500, 52.903],
-          [6.500, 52.902],
+          [6.57425843667977, 52.98156322661845],
+          [6.574131937527113, 52.98117153663915],
+          [6.573704249915465, 52.98101921179938],
+          [6.5737524400692, 52.980841498807536],
+          [6.574270484218005, 52.98093216879252],
+          [6.574246389141564, 52.9806347705302],
+          [6.574475292369556, 52.98062389006705],
+          [6.575282477439146, 52.980841498807536],
+          [6.575583665897312, 52.98129847359539],
+          [6.5754993331288745, 52.98138914262137],
+          [6.57425843667977, 52.98156322661845]
         ]],
       },
     },
     created_at: new Date().toISOString(),
   },
   {
-    id: '4',
-    name: 'Garden South',
-    type: 'grass',
-    instructions: `## Tasks
-- Mowing: Every 10 days
-- Flower bed weeding: Weekly
-- Mulch refresh: Spring & Fall
-
-## Notes
-- Contains decorative plants; use caution
-- Wildflower section (northeast) — mow only in October
-
-## Key Info
-- Area: ~600 m²
-- Includes 3 ornamental beds
-
-## Contact
-**Horticulturist:** Sofia van Dijk  
-**Phone:** +31 6 4567 8901
-
-## Quality Standards
-- Preserve flower bed edges
-- No herbicides without approval`,
-    geojson: {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'Polygon',
-        coordinates: [[
-          [6.503, 52.902],
-          [6.505, 52.902],
-          [6.505, 52.903],
-          [6.503, 52.903],
-          [6.503, 52.902],
-        ]],
-      },
-    },
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '5',
-    name: 'Loading Dock',
+    id: 'DEcoKEMoCxikArLCYD8jKe0VgeL43fze',
+    name: 'Storage Yard',
     type: 'maintenance',
     instructions: `## Tasks
 - Daily sweep & debris removal
 - Pressure wash: Monthly
-- Inspect dock equipment: Weekly
+- Inspect storage structures: Weekly
 - Check drainage grates: After rainfall
 
 ## Notes
-- Active deliveries: Mon–Fri, 6 AM–4 PM
-- Schedule cleaning outside delivery hours
+- Active use: Mon–Fri, 6 AM–4 PM
+- Schedule cleaning outside peak hours
 
 ## Key Info
 - Surface: Concrete, sealed
-- Drainage: 6 floor grates
+- Drainage: 4 floor grates
 
 ## Contact
 **Operations Lead:** Marco Hendriks  
@@ -198,11 +169,101 @@ export const HARDCODED_ZONES: Zone[] = [
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [6.506, 52.900],
-          [6.508, 52.900],
-          [6.508, 52.902],
-          [6.506, 52.902],
-          [6.506, 52.900],
+          [6.575537876522674, 52.98099651063825],
+          [6.575375284820382, 52.980500290572735],
+          [6.5766479853887745, 52.98045978256059],
+          [6.576305982152661, 52.98103026689836],
+          [6.575537876522674, 52.98099651063825]
+        ]],
+      },
+    },
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'Kntg7nIgjZKRgC85XnaeUdvXXGrdPh83',
+    name: 'South Sports Field',
+    type: 'grass',
+    instructions: `## Tasks
+- Mowing: Every 7 days during season
+- Line marking: Monthly
+- Aeration: Spring & Fall
+- Fertilizing: Quarterly
+
+## Notes
+- Sports field in active use
+- Coordinate maintenance with facility schedule
+- No mowing during events
+
+## Key Info
+- Area: ~2,500 m²
+- Grass type: Professional sports turf
+- Usage: Soccer/multi-sport
+
+## Contact
+**Sports Coordinator:** Lisa Vermeer  
+**Phone:** +31 6 7890 1234
+
+## Quality Standards
+- Mowing height: 2.5–3 cm
+- Even, level surface required
+- No standing water`,
+    geojson: {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [6.576173229073476, 52.97890347637821],
+          [6.576838676002012, 52.977860690236895],
+          [6.579261585333597, 52.978615813749286],
+          [6.5779136286246, 52.979740768953064],
+          [6.576173229073476, 52.97890347637821]
+        ]],
+      },
+    },
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'FeEIfEQ2g7lcw0EDdjkSahYsr9nBQKO0',
+    name: 'Central Garden',
+    type: 'grass',
+    instructions: `## Tasks
+- Mowing: Every 10 days
+- Flower bed weeding: Weekly
+- Mulch refresh: Spring & Fall
+- Pruning: Seasonal
+
+## Notes
+- Contains decorative plants; use caution
+- Wildflower section (northeast) — mow only in October
+- Public access area
+
+## Key Info
+- Area: ~800 m²
+- Includes 5 ornamental beds
+- Mixed grass and garden beds
+
+## Contact
+**Horticulturist:** Sofia van Dijk  
+**Phone:** +31 6 4567 8901
+
+## Quality Standards
+- Preserve flower bed edges
+- No herbicides without approval
+- Keep pathways clear`,
+    geojson: {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [6.5707862819641605, 52.981174100823466],
+          [6.5706071231755345, 52.98072721904401],
+          [6.570675374141928, 52.98002863596756],
+          [6.572398711060686, 52.980583394039826],
+          [6.572535212995859, 52.98104055043129],
+          [6.572125707192583, 52.98156174776119],
+          [6.5707862819641605, 52.981174100823466]
         ]],
       },
     },

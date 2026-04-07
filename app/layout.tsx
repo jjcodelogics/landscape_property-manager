@@ -13,7 +13,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+        <meta name="theme-color" content="#111827" />
+      </head>
+      <body className="font-sans antialiased touch-manipulation">{children}</body>
     </html>
   );
 }

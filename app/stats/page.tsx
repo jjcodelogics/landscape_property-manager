@@ -51,65 +51,75 @@ export default function StatsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading statistics...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4\">
+        <div className="text-center\">
+          <div className=\"text-4xl mb-3\">📊</div>
+          <p className="text-gray-600 font-medium">Loading statistics...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-red-500">{error}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4\">
+        <div className="text-center max-w-md\">
+          <div className=\"text-4xl mb-3\">⚠️</div>
+          <p className="text-red-600 font-medium">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b px-4 py-4 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
+    <div className="min-h-screen bg-gray-50 pb-safe\">
+      {/* Mobile-optimized header */}
+      <div className="bg-white border-b px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sticky top-0 z-10 shadow-sm safe-top\">
         <Link
           href="/"
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="p-2.5 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+          aria-label="Back to map"
         >
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
         </Link>
-        <h1 className="text-xl font-bold text-gray-900">Statistics</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900">Statistics</h1>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        <div className="bg-white rounded-xl shadow-sm p-5 border">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+      <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6\">
+        {/* Weekly total card */}
+        <div className="bg-white rounded-2xl shadow-sm p-5 sm:p-6 border\">
+          <h2 className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wide mb-3\">
             This Week
           </h2>
-          <div className="text-4xl font-bold text-gray-900">
+          <div className="text-3xl sm:text-4xl font-bold text-gray-900\">
             {formatMinutes(stats?.weeklyTotal || 0)}
           </div>
-          <p className="text-sm text-gray-500 mt-1">Total time logged in last 7 days</p>
+          <p className="text-sm text-gray-600 mt-2">Total time logged in last 7 days</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="px-5 py-4 border-b">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+        {/* Time per zone */}
+        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden\">
+          <div className="px-4 sm:px-5 py-4 border-b bg-gray-50\">
+            <h2 className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wide\">
               Time Per Zone
             </h2>
           </div>
           {stats?.zoneStats && stats.zoneStats.length > 0 ? (
-            <ul className="divide-y">
+            <ul className="divide-y\">
               {stats.zoneStats.map((zs) => (
-                <li key={zs.zone_id} className="px-5 py-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{zs.zone_name}</p>
-                      <p className="text-sm text-gray-500">
+                <li key={zs.zone_id} className="px-4 sm:px-5 py-4 active:bg-gray-50 transition-colors\">
+                  <div className="flex items-center justify-between gap-3\">
+                    <div className="min-w-0 flex-1\">
+                      <p className="font-semibold text-gray-900 truncate text-base">{zs.zone_name}</p>
+                      <p className="text-sm text-gray-600 mt-0.5\">
                         {zs.task_count} task{zs.task_count !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">
+                    <div className="text-right flex-shrink-0\">
+                      <p className="font-bold text-gray-900 text-base\">
                         {formatMinutes(zs.total_minutes)}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-600 mt-0.5\">
                         Avg {formatMinutes(zs.avg_minutes)}
                       </p>
                     </div>
@@ -118,37 +128,38 @@ export default function StatsPage() {
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-8 text-center text-gray-400 italic">
+            <p className="px-4 sm:px-5 py-10 text-center text-gray-400 italic text-sm\">
               No tasks logged yet.
             </p>
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-          <div className="px-5 py-4 border-b">
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+        {/* Recent activity */}
+        <div className="bg-white rounded-2xl shadow-sm border overflow-hidden\">
+          <div className="px-4 sm:px-5 py-4 border-b bg-gray-50\">
+            <h2 className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-wide\">
               Recent Activity
             </h2>
           </div>
           {stats?.recentTasks && stats.recentTasks.length > 0 ? (
-            <ul className="divide-y">
+            <ul className="divide-y\">
               {stats.recentTasks.map((task) => (
-                <li key={task.id} className="px-5 py-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-900 truncate">
+                <li key={task.id} className="px-4 sm:px-5 py-4 active:bg-gray-50 transition-colors\">
+                  <div className="flex items-start justify-between gap-3\">
+                    <div className="min-w-0 flex-1\">
+                      <p className="font-semibold text-gray-900 truncate text-base\">
                         {task.zones?.name || 'Unknown Zone'}
                       </p>
-                      <p className="text-sm text-gray-500 capitalize">
+                      <p className="text-sm text-gray-600 capitalize mt-0.5\">
                         {task.task_type.replace('_', ' ')}
                         {task.notes && ` · ${task.notes}`}
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-medium text-gray-900">
+                    <div className="text-right flex-shrink-0\">
+                      <p className="font-bold text-gray-900 text-base\">
                         {formatMinutes(task.duration_minutes)}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-500 mt-0.5\">
                         {formatDate(task.created_at)}
                       </p>
                     </div>
@@ -157,7 +168,7 @@ export default function StatsPage() {
               ))}
             </ul>
           ) : (
-            <p className="px-5 py-8 text-center text-gray-400 italic">
+            <p className="px-4 sm:px-5 py-10 text-center text-gray-400 italic text-sm\">
               No recent activity.
             </p>
           )}

@@ -24,3 +24,40 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Mobile-first improvements */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0.75rem);
+  }
+  
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Smooth scrolling on mobile */
+@media (max-width: 640px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+}
+
+/* Custom breakpoint for very small screens */
+@media (min-width: 375px) {
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
+}
