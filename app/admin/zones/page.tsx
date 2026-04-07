@@ -8,6 +8,16 @@ import { Zone, ZoneType } from '@/lib/types';
 
 const AdminMap = dynamic(() => import('@/components/AdminMap'), { ssr: false });
 
+const INSTRUCTIONS_PLACEHOLDER = `## Tasks
+- Task 1
+
+## Notes
+- Note 1
+
+## Contact
+**Name:** 
+**Phone:** `;
+
 interface ZoneFormData {
   name: string;
   type: ZoneType;
@@ -222,7 +232,7 @@ export default function AdminZonesPage() {
                     value={formData.instructions}
                     onChange={(e) => setFormData((p) => ({ ...p, instructions: e.target.value }))}
                     className="input resize-none"
-                    placeholder="## Tasks&#10;- Task 1&#10;&#10;## Notes&#10;- Note 1"
+                    placeholder={INSTRUCTIONS_PLACEHOLDER}
                     rows={5}
                   />
                 </div>

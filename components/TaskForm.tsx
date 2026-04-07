@@ -18,23 +18,15 @@ const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = 
 
 const QUICK_MINUTES = [5, 10, 15, 30, 45, 60];
 
-// Default note templates per task type
-const DEFAULT_NOTES: Record<TaskType, string> = {
-  mowing:      '',
-  waste:       '',
-  maintenance: '',
-};
-
 export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
   const [taskType, setTaskType] = useState<TaskType>('mowing');
   const [duration, setDuration] = useState('');
-  const [notes, setNotes] = useState(DEFAULT_NOTES.mowing);
+  const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleTaskTypeChange = (type: TaskType) => {
     setTaskType(type);
-    setNotes(DEFAULT_NOTES[type]);
   };
 
   const addMinutes = (mins: number) => {

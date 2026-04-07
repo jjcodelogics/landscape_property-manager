@@ -127,7 +127,6 @@ export default function StatsPage() {
               {stats.zoneStats.map((zs, idx) => {
                 const maxMinutes = Math.max(...(stats.zoneStats.map((z) => z.total_minutes)));
                 const pct = maxMinutes > 0 ? Math.round((zs.total_minutes / maxMinutes) * 100) : 0;
-                const barColor = pct >= 80 ? 'var(--color-zone-grass)' : pct >= 40 ? 'var(--color-zone-maintenance)' : 'var(--color-zone-waste)';
 
                 return (
                   <li
@@ -144,11 +143,11 @@ export default function StatsPage() {
                       </div>
                       <p className="font-bold text-[var(--color-text)] flex-shrink-0">{formatMinutes(zs.total_minutes)}</p>
                     </div>
-                    {/* Progress bar */}
+                    {/* Progress bar: width reflects relative usage vs. highest-usage zone */}
                     <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--color-border)' }}>
                       <div
                         className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, background: barColor }}
+                        style={{ width: `${pct}%`, background: 'var(--color-secondary)' }}
                       />
                     </div>
                   </li>
