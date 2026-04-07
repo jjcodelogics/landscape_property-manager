@@ -20,7 +20,7 @@ export interface Task {
 }
 
 export interface TaskWithZone extends Task {
-  zones?: Zone;
+  zones?: Pick<Zone, 'id' | 'name' | 'type'>;
 }
 
 export interface ZoneStats {
