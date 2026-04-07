@@ -88,7 +88,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
         >
           <div>
             <h3 className="text-lg font-bold text-[var(--color-text)]">Log Task</h3>
-            <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{zone.name}</p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{zone.title}</p>
           </div>
           <button
             onClick={onClose}

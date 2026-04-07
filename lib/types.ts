@@ -3,10 +3,13 @@ export type TaskType = 'mowing' | 'waste' | 'maintenance';
 
 export interface Zone {
   id: string;
+  title: string;
   name: string;
   type: ZoneType;
   instructions: string | null;
   geojson: GeoJSON.Feature;
+  last_worked_at: string | null;
+  next_scheduled_work: string | null;
   created_at: string;
 }
 

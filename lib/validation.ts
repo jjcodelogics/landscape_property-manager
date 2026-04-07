@@ -126,6 +126,40 @@ export function validateUUID(input: unknown, fieldName: string): string {
 }
 
 /**
+ * Validate ISO date string
+ */
+export function validateISODate(
+  input: unknown,
+  fieldName: string,
+  options: {
+    required?: boolean;
+  } = {}
+): string | null {
+  const { required = false } = options;
+  
+  if (input === null || input === undefined || input === '') {
+    if (required) {
+      throw new Error(`${fieldName} is required`);
+    }
+    return null;
+  }
+  
+  if (typeof input !== 'string') {
+    throw new Error(`${fieldName} must be a string`);
+  }
+  
+  // Validate ISO 8601 format and that it's a valid date
+  const date = new Date(input);
+  
+  if (isNaN(date.getTime())) {
+    throw new Error(`${fieldName} must be a valid ISO 8601 date`);
+  }
+  
+  // Return the ISO string for consistency
+  return date.toISOString();
+}
+
+/**
  * Validate GeoJSON object
  */
 export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
@@ -165,12 +199,21 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
     if (!Array.isArray(geojson.coordinates)) {
       throw new Error(`${fieldName} geometry must have coordinates array`);
     }
+    
+    // Validate coordinates are within reasonable bounds for the property
+    // Property bounds: roughly [52.976, 6.565] to [52.986, 6.582]
+    validateCoordinateBounds(geojson.coordinates, fieldName);
   }
   
   // Validate Feature
   if (geojson.type === 'Feature') {
     if (!geojson.geometry) {
       throw new Error(`${fieldName} Feature must have a geometry property`);
+    }
+    
+    // Recursively validate the geometry
+    if (geojson.geometry.coordinates) {
+      validateCoordinateBounds(geojson.geometry.coordinates, fieldName);
     }
   }
   
@@ -190,6 +233,35 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
   }
   
   return geojson as GeoJSON;
+}
+
+/**
+ * Validate coordinate bounds (recursive)
+ */
+function validateCoordinateBounds(coords: any, fieldName: string): void {
+  if (typeof coords[0] === 'number') {
+    // This is a single coordinate pair [lon, lat]
+    const [lon, lat] = coords;
+    
+    // Validate longitude and latitude ranges
+    if (lon < -180 || lon > 180) {
+      throw new Error(`${fieldName} contains invalid longitude: ${lon}`);
+    }
+    if (lat < -90 || lat > 90) {
+      throw new Error(`${fieldName} contains invalid latitude: ${lat}`);
+    }
+    
+    // Optional: Validate coordinates are within reasonable bounds for the property
+    // Expanded bounds to allow some flexibility: ~10km radius
+    if (lon < 6.4 || lon > 6.75 || lat < 52.9 || lat > 53.1) {
+      console.warn(`Coordinates [${lon}, ${lat}] are far from expected property location`);
+    }
+  } else if (Array.isArray(coords)) {
+    // Recursively validate nested coordinate arrays
+    for (const coord of coords) {
+      validateCoordinateBounds(coord, fieldName);
+    }
+  }
 }
 
 /**

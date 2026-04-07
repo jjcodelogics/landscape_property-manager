@@ -45,8 +45,10 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
     drawnItemsRef.current = drawnItems;
 
     import('leaflet-draw').then(() => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const drawControl = new (L.Control as any).Draw({
+      // Type for Leaflet Draw control
+      const LDrawControl = (L.Control as any).Draw;
+      
+      const drawControl = new LDrawControl({
         edit: {
           featureGroup: drawnItems,
         },
@@ -64,8 +66,13 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
       });
       map.addControl(drawControl);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map.on(L.Draw.Event.CREATED, (e: any) => {
+      // Type for draw created event
+      interface DrawCreatedEvent {
+        layer: L.Layer & { toGeoJSON: () => GeoJSON.Feature };
+        layerType: string;
+      }
+
+      map.on(L.Draw.Event.CREATED, (e: DrawCreatedEvent) => {
         drawnItems.clearLayers();
         const layer = e.layer;
         drawnItems.addLayer(layer);
@@ -73,12 +80,16 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
         onPolygonDrawn(geojson);
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map.on(L.Draw.Event.EDITED, (e: any) => {
+      // Type for draw edited event
+      interface DrawEditedEvent {
+        layers: L.LayerGroup;
+      }
+
+      map.on(L.Draw.Event.EDITED, (e: DrawEditedEvent) => {
         const layers = e.layers;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        layers.eachLayer((layer: any) => {
-          const geojson = layer.toGeoJSON() as GeoJSON.Feature;
+        layers.eachLayer((layer: L.Layer) => {
+          const geoJsonLayer = layer as L.Layer & { toGeoJSON: () => GeoJSON.Feature };
+          const geojson = geoJsonLayer.toGeoJSON() as GeoJSON.Feature;
           onPolygonDrawn(geojson);
         });
       });
@@ -109,7 +120,7 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
       L.geoJSON(zone.geojson, {
         style: { color, fillColor: color, fillOpacity: 0.3, weight: 2, dashArray: '4' },
       })
-        .bindTooltip(zone.name, { permanent: false, direction: 'center' })
+        .bindTooltip(zone.title, { permanent: false, direction: 'center' })
         .addTo(map);
     });
 

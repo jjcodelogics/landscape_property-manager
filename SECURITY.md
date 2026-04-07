@@ -12,12 +12,13 @@ This document outlines the security measures implemented in the Landscape Proper
 - **URL validation** for Supabase endpoints
 - **Secure secrets management** with `.gitignore` protection
 - **Production/development environment separation**
+- **Enhanced CORS origin handling** with proper trimming and validation
 
 **Setup:**
 ```bash
 # Copy and configure environment variables
-cp .env.example .env
-# Edit .env with your actual values
+cp .env.example .env.local
+# Edit .env.local with your actual values
 ```
 
 ### 2. Security Headers
@@ -54,7 +55,15 @@ Implemented headers:
 - **Rate limit headers** (`X-RateLimit-*`) in responses
 - **Automatic cleanup** of expired entries
 
-**Note:** For production with multiple server instances, consider using Redis for distributed rate limiting.
+⚠️ **PRODUCTION WARNING:** The current implementation uses in-memory storage which does NOT work correctly in serverless/distributed environments (Vercel, AWS Lambda, etc.). 
+
+**For production deployment, you MUST implement one of these solutions:**
+- Upstash Redis (recommended, serverless-friendly)
+- Vercel KV
+- Database-based rate limiting
+- Third-party services (Cloudflare, API Gateway)
+
+See `PRODUCTION.md` for detailed implementation guide.
 
 ### 5. Input Validation & Sanitization
 
@@ -65,29 +74,44 @@ Comprehensive validation functions:
 - **Type validation** - Ensures correct data types
 - **Enum validation** - Validates against allowed values
 - **UUID validation** - Proper UUID format checking
-- **GeoJSON validation** - Structure and size validation (max 1MB)
+- **GeoJSON validation** - Structure, size validation (max 1MB), and coordinate bounds checking
+- **Coordinate range validation** - Validates lat/lon are within valid ranges and warns if far from property
 - **Length constraints** - Prevents oversized inputs
 - **Integer range validation** - Min/max bounds checking
+- **Safe error messages** - Prevents information leakage in production
 
 ### 6. API Route Security
 
-**Locations:** `app/api/zones/route.ts`, `app/api/zones/[id]/route.ts`, `app/api/tasks/route.ts`
+**Locations:** `app/api/zones/route.ts`, `app/api/zones/[id]/route.ts`, `app/api/tasks/route.ts`, `app/api/stats/route.ts`
 
-All API routes include:
-- ✅ Rate limiting
+**All API routes include:**
+- ✅ Rate limiting (including stats endpoint)
 - ✅ Content-Type validation
 - ✅ JSON parsing error handling
-- ✅ Input validation and sanitization
+- ✅ Input validation and sanitization with proper TypeScript types
 - ✅ Safe error messages (no information leakage)
 - ✅ Proper HTTP status codes
 - ✅ UUID validation for IDs
 
-### 7. Database Security
+### 7. Error Handling & Monitoring
+
+**Location:** `components/ErrorBoundary.tsx`, `app/layout.tsx`
+
+- **React Error Boundary** - Catches and handles React component errors gracefully
+- **User-friendly error pages** - Prevents app crashes from displaying technical errors
+- **Development mode details** - Shows error stack traces in development
+- **Production mode safety** - Generic error messages in production
+- **Error logging** - All errors logged to console (integrate with Sentry for production)
+
+### 8. Database Security
 
 **Location:** `supabase/schema.sql`
 
 Implemented measures:
 - **Row Level Security (RLS)** enabled on all tables
+- **Authentication-based policies**:
+  - Public read access for zones and tasks (viewing)
+  - Write operations (create/edit/delete) require authentication
 - **Database constraints**:
   - Check constraints for enums
   - Length constraints (name: 200 chars, instructions/notes: 2000 chars)
@@ -97,7 +121,14 @@ Implemented measures:
 - **Cascade deletion** for referential integrity
 - **Documentation comments** on tables and columns
 
-**Note:** Current RLS policies allow public access. For production with authentication, update policies to check `auth.role()`.
+**⚠️ Important:** To enable write operations, you must implement Supabase Auth. See `PRODUCTION.md` for setup instructions.
+
+**For Development/Testing:** If you need to temporarily allow anonymous writes:
+```sql
+-- Temporarily allow unauthenticated writes (DEVELOPMENT ONLY)
+drop policy "Authenticated users can insert zones" on zones;
+create policy "Allow insert for zones" on zones for insert with check (true);
+```
 
 ### 8. Error Handling
 

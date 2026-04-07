@@ -55,13 +55,34 @@ export default function Sidebar({ zone, onClose, onLogTask }: SidebarProps) {
         >
           <div className="flex-1 min-w-0 pr-3">
             <h2 className="text-xl font-bold text-[var(--color-text)] truncate leading-tight">
-              {zone.name}
+              {zone.title}
             </h2>
-            <span
-              className={`inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}`}
-            >
-              {ZONE_TYPE_LABELS[zone.type] || zone.type}
-            </span>
+            {zone.name && (
+              <p className="text-sm text-[var(--color-text-muted)] truncate mt-0.5">
+                {zone.name}
+              </p>
+            )}
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <span
+                className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}`}
+              >
+                {ZONE_TYPE_LABELS[zone.type] || zone.type}
+              </span>
+            </div>
+            {(zone.last_worked_at || zone.next_scheduled_work) && (
+              <div className="mt-2 text-xs space-y-0.5">
+                {zone.last_worked_at && (
+                  <p className="text-[var(--color-text-muted)]">
+                    Last worked: {new Date(zone.last_worked_at).toLocaleDateString()}
+                  </p>
+                )}
+                {zone.next_scheduled_work && (
+                  <p className="text-[var(--color-secondary)] font-medium">
+                    Next scheduled: {new Date(zone.next_scheduled_work).toLocaleDateString()}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <button
             onClick={onClose}

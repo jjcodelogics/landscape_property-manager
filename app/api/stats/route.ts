@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data: tasks, error: tasksError } = await supabase
       .from('tasks')
-      .select('*, zones(id, name, type)')
+      .select('*, zones(id, title, type)')
       .order('created_at', { ascending: false });
 
     if (tasksError) {
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   
   for (const task of tasks || []) {
     const zoneId = task.zone_id;
-    const zoneName = task.zones?.name || 'Unknown';
+    const zoneName = task.zones?.title || 'Unknown';
     
     if (!zoneStatsMap[zoneId]) {
       zoneStatsMap[zoneId] = { zone_name: zoneName, total_minutes: 0, task_count: 0 };

@@ -94,7 +94,7 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
       });
 
       // Zone label tooltip at higher zoom
-      layer.bindTooltip(zone.name, {
+      layer.bindTooltip(zone.title, {
         permanent: false,
         direction: 'center',
         className: 'zone-tooltip',

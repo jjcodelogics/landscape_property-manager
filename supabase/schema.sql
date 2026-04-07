@@ -4,10 +4,13 @@ create extension if not exists "uuid-ossp";
 -- Zones table
 create table if not exists zones (
   id uuid primary key default uuid_generate_v4(),
+  title text not null,
   name text not null,
   type text not null check (type in ('grass', 'waste', 'maintenance')),
   instructions text,
   geojson jsonb not null,
+  last_worked_at timestamptz,
+  next_scheduled_work timestamptz,
   created_at timestamptz default now()
 );
 
@@ -26,35 +29,38 @@ alter table zones enable row level security;
 alter table tasks enable row level security;
 
 -- RLS Policies for zones table
--- Allow anonymous read access (public viewing)
+-- Allow public read access (viewing zones on map)
 create policy "Allow public read access to zones"
   on zones for select
   using (true);
 
--- Allow anonymous insert (for now - restrict this in production with authentication)
-create policy "Allow insert for zones"
+-- Require authentication for write operations
+create policy "Authenticated users can insert zones"
   on zones for insert
+  to authenticated
   with check (true);
 
--- Allow anonymous update (for now - restrict this in production with authentication)
-create policy "Allow update for zones"
+create policy "Authenticated users can update zones"
   on zones for update
-  using (true);
+  to authenticated
+  using (true)
+  with check (true);
 
--- Allow anonymous delete (for now - restrict this in production with authentication)
-create policy "Allow delete for zones"
+create policy "Authenticated users can delete zones"
   on zones for delete
+  to authenticated
   using (true);
 
 -- RLS Policies for tasks table
--- Allow anonymous read access
+-- Allow public read access (viewing task history)
 create policy "Allow public read access to tasks"
   on tasks for select
   using (true);
 
--- Allow anonymous insert (for now - restrict this in production with authentication)
-create policy "Allow insert for tasks"
+-- Require authentication for task creation
+create policy "Authenticated users can insert tasks"
   on tasks for insert
+  to authenticated
   with check (true);
 
 -- Indexes for performance
@@ -69,6 +75,9 @@ alter table zones add constraint zones_geojson_size_check
   check (pg_column_size(geojson) < 1048576);
 
 -- Add constraint to limit text field sizes
+alter table zones add constraint zones_title_length_check 
+  check (char_length(title) <= 200);
+
 alter table zones add constraint zones_name_length_check 
   check (char_length(name) <= 200);
   
@@ -84,15 +93,18 @@ alter table tasks add constraint tasks_duration_max_check
 -- Comments for documentation
 comment on table zones is 'Geographical zones for landscape management';
 comment on table tasks is 'Tasks performed on zones';
+comment on column zones.title is 'Zone title (required, max 200 chars)';
+comment on column zones.last_worked_at is 'Last work completion date';
+comment on column zones.next_scheduled_work is 'Estimated next work date';
 comment on column zones.geojson is 'GeoJSON geometry data (max 1MB)';
 comment on column tasks.duration_minutes is 'Task duration in minutes (max 1440 = 24 hours)';
 
--- NOTE: For production deployment with authentication, update RLS policies to:
--- 1. Replace 'true' with 'auth.role() = ''authenticated''' for write operations
--- 2. Add user-specific policies if needed
--- 3. Consider adding admin role checks for delete operations
--- Example authenticated policy:
--- create policy "Authenticated users can insert zones"
---   on zones for insert
---   to authenticated
---   with check (true);
+-- NOTE: RLS policies now require authentication for write operations.
+-- To allow anonymous writes during development/testing, you can temporarily run:
+-- drop policy "Authenticated users can insert zones" on zones;
+-- create policy "Allow insert for zones" on zones for insert with check (true);
+-- 
+-- For production with user-specific permissions, consider adding:
+-- - User ownership tracking (add user_id columns)
+-- - Admin role checks for delete operations
+-- - Audit logging for sensitive operations

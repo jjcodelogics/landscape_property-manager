@@ -9,6 +9,13 @@ import {
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 
+interface CreateTaskRequest {
+  zone_id: string;
+  task_type: string;
+  duration_minutes: number;
+  notes?: string;
+}
+
 export async function GET(request: NextRequest) {
   // Apply rate limiting
   const rateLimitResult = checkRateLimit(request);
@@ -70,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and validate request body
-    let body: any;
+    let body: CreateTaskRequest;
     try {
       body = await request.json();
     } catch (error) {

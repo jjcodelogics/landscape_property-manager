@@ -4,9 +4,20 @@ import {
   validateText,
   validateGeoJSON,
   validateZoneType,
+  validateISODate,
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+
+interface CreateZoneRequest {
+  title: string;
+  name: string;
+  type: string;
+  instructions?: string;
+  geojson: unknown;
+  last_worked_at?: string;
+  next_scheduled_work?: string;
+}
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting
@@ -68,7 +79,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and validate request body
-    let body: any;
+    let body: CreateZoneRequest;
     try {
       body = await request.json();
     } catch (error) {
@@ -82,6 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate and sanitize inputs
+    const title = validateText(body.title, 'Title', { maxLength: 200 });
     const name = validateText(body.name, 'Name', { maxLength: 200 });
     const type = validateZoneType(body.type);
     const instructions = validateText(body.instructions || '', 'Instructions', {
@@ -89,11 +101,13 @@ export async function POST(request: NextRequest) {
       maxLength: 2000,
     });
     const geojson = validateGeoJSON(body.geojson, 'GeoJSON');
+    const last_worked_at = validateISODate(body.last_worked_at, 'Last worked at', { required: false });
+    const next_scheduled_work = validateISODate(body.next_scheduled_work, 'Next scheduled work', { required: false });
 
     // Insert into database
     const { data, error } = await supabase
       .from('zones')
-      .insert([{ name, type, instructions, geojson }])
+      .insert([{ title, name, type, instructions, geojson, last_worked_at, next_scheduled_work }])
       .select()
       .single();
 

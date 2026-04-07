@@ -19,9 +19,12 @@ const INSTRUCTIONS_PLACEHOLDER = `## Tasks
 **Phone:** `;
 
 interface ZoneFormData {
+  title: string;
   name: string;
   type: ZoneType;
   instructions: string;
+  last_worked_at: string;
+  next_scheduled_work: string;
 }
 
 const ZONE_TYPE_OPTIONS: { value: ZoneType; label: string; badge: string }[] = [
@@ -37,9 +40,12 @@ export default function AdminZonesPage() {
   const [editingZone, setEditingZone] = useState<Zone | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<ZoneFormData>({
+    title: '',
     name: '',
     type: 'grass',
     instructions: '',
+    last_worked_at: '',
+    next_scheduled_work: '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,23 +72,33 @@ export default function AdminZonesPage() {
     setDrawnGeojson(geojson);
     setShowForm(true);
     setEditingZone(null);
-    setFormData({ name: '', type: 'grass', instructions: '' });
+    setFormData({ 
+      title: '', 
+      name: '', 
+      type: 'grass', 
+      instructions: '',
+      last_worked_at: '',
+      next_scheduled_work: '',
+    });
   };
 
   const handleEditZone = (zone: Zone) => {
     setEditingZone(zone);
     setDrawnGeojson(zone.geojson);
     setFormData({
+      title: zone.title,
       name: zone.name,
       type: zone.type,
       instructions: zone.instructions || '',
+      last_worked_at: zone.last_worked_at ? zone.last_worked_at.slice(0, 16) : '',
+      next_scheduled_work: zone.next_scheduled_work ? zone.next_scheduled_work.slice(0, 16) : '',
     });
     setShowForm(true);
   };
 
   const handleSave = async () => {
-    if (!formData.name.trim()) {
-      setError('Zone name is required');
+    if (!formData.title.trim()) {
+      setError('Zone title is required');
       return;
     }
     if (!drawnGeojson) {
@@ -190,6 +206,20 @@ export default function AdminZonesPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
+                    className="input"
+                    placeholder="e.g. North Lawn"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
                     Name
                   </label>
                   <input
@@ -237,6 +267,32 @@ export default function AdminZonesPage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                      Last Worked At
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.last_worked_at}
+                      onChange={(e) => setFormData((p) => ({ ...p, last_worked_at: e.target.value }))}
+                      className="input"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                      Next Scheduled Work
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={formData.next_scheduled_work}
+                      onChange={(e) => setFormData((p) => ({ ...p, next_scheduled_work: e.target.value }))}
+                      className="input"
+                    />
+                  </div>
+                </div>
+
                 {error && (
                   <p className="text-[var(--color-danger)] text-sm bg-red-50 px-4 py-3 rounded-xl border border-red-200 font-medium">
                     {error}
@@ -281,6 +337,13 @@ export default function AdminZonesPage() {
               <ul className="space-y-2">
                 {zones.map((zone) => {
                   const badge = zone.type === 'grass' ? 'badge-grass' : zone.type === 'waste' ? 'badge-waste' : 'badge-maintenance';
+                  const lastWorked = zone.last_worked_at 
+                    ? new Date(zone.last_worked_at).toLocaleDateString() 
+                    : null;
+                  const nextWork = zone.next_scheduled_work 
+                    ? new Date(zone.next_scheduled_work).toLocaleDateString() 
+                    : null;
+                  
                   return (
                     <li
                       key={zone.id}
@@ -288,10 +351,25 @@ export default function AdminZonesPage() {
                       style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-[var(--color-text)] truncate">{zone.name}</p>
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
-                          {zone.type}
-                        </span>
+                        <p className="font-semibold text-[var(--color-text)] truncate">{zone.title}</p>
+                        {zone.name && (
+                          <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">{zone.name}</p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
+                            {zone.type}
+                          </span>
+                          {lastWorked && (
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              Last: {lastWorked}
+                            </span>
+                          )}
+                          {nextWork && (
+                            <span className="text-xs text-[var(--color-secondary)] font-medium">
+                              Next: {nextWork}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-1 ml-3">
                         <button
@@ -299,7 +377,7 @@ export default function AdminZonesPage() {
                           className="p-2.5 rounded-xl transition-colors touch-manipulation"
                           style={{ color: 'var(--color-secondary)' }}
                           title="Edit zone"
-                          aria-label={`Edit ${zone.name}`}
+                          aria-label={`Edit ${zone.title}`}
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -309,7 +387,7 @@ export default function AdminZonesPage() {
                           className="p-2.5 rounded-xl transition-colors disabled:opacity-50 touch-manipulation"
                           style={{ color: 'var(--color-danger)' }}
                           title="Delete zone"
-                          aria-label={`Delete ${zone.name}`}
+                          aria-label={`Delete ${zone.title}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

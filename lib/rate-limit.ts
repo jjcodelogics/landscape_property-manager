@@ -1,7 +1,34 @@
 /**
  * Rate limiting utilities
- * In-memory rate limiting for API routes
- * For production, consider using Redis or a dedicated service
+ * 
+ * ⚠️ PRODUCTION WARNING ⚠️
+ * This implementation uses in-memory storage which does NOT work correctly
+ * in serverless environments (Vercel, AWS Lambda, etc.) where each request
+ * may be handled by a different instance.
+ * 
+ * For production deployment, implement one of these solutions:
+ * 
+ * 1. Redis-based rate limiting (recommended):
+ *    - Use Upstash Redis (serverless-friendly)
+ *    - Use Vercel KV (built on Redis)
+ *    - Install: npm install @upstash/redis
+ * 
+ * 2. Vercel Edge Config:
+ *    - For read-heavy rate limiting scenarios
+ *    - Good for API key-based limits
+ * 
+ * 3. Database-based rate limiting:
+ *    - Use Supabase with proper indexing
+ *    - Slower but works without additional services
+ * 
+ * 4. Third-party services:
+ *    - Cloudflare Rate Limiting
+ *    - API Gateway rate limiting (AWS, GCP, Azure)
+ * 
+ * Current implementation is suitable for:
+ * - Development and testing
+ * - Single-instance deployments
+ * - Traditional server deployments (non-serverless)
  */
 
 interface RateLimitEntry {
