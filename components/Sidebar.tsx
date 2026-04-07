@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Zone } from '@/lib/types';
-import { X, ClipboardList } from 'lucide-react';
+import { X, ClipboardList, Edit3, Save, XCircle } from 'lucide-react';
 
 const ZONE_TYPE_LABELS: Record<string, string> = {
   grass:       'Grass',
@@ -15,10 +16,62 @@ interface SidebarProps {
   zone: Zone | null;
   onClose: () => void;
   onLogTask: () => void;
+  onZoneUpdated?: () => void;
 }
 
-export default function Sidebar({ zone, onClose, onLogTask }: SidebarProps) {
+export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: SidebarProps) {
+  const [isEditingInstructions, setIsEditingInstructions] = useState(false);
+  const [editedInstructions, setEditedInstructions] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   if (!zone) return null;
+
+  const handleStartEdit = () => {
+    setEditedInstructions(zone.instructions || '');
+    setIsEditingInstructions(true);
+    setError(null);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingInstructions(false);
+    setEditedInstructions('');
+    setError(null);
+  };
+
+  const handleSaveInstructions = async () => {
+    setSaving(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/zones/${zone.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: zone.title,
+          name: zone.name,
+          type: zone.type,
+          instructions: editedInstructions,
+          geojson: zone.geojson,
+          last_worked_at: zone.last_worked_at,
+          next_scheduled_work: zone.next_scheduled_work,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update instructions');
+      }
+
+      setIsEditingInstructions(false);
+      zone.instructions = editedInstructions; // Update local state
+      onZoneUpdated?.(); // Notify parent to refresh
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const badgeClass =
     zone.type === 'grass'
@@ -95,16 +148,69 @@ export default function Sidebar({ zone, onClose, onLogTask }: SidebarProps) {
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
-          {zone.instructions ? (
-            <div className="zone-markdown">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {zone.instructions}
-              </ReactMarkdown>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
+              Instructions
+            </h3>
+            {!isEditingInstructions && (
+              <button
+                onClick={handleStartEdit}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-secondary)] hover:bg-[var(--color-bg)] transition-colors touch-manipulation"
+                aria-label="Edit instructions"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Edit
+              </button>
+            )}
+          </div>
+
+          {isEditingInstructions ? (
+            <div className="space-y-3">
+              <textarea
+                value={editedInstructions}
+                onChange={(e) => setEditedInstructions(e.target.value)}
+                className="input resize-none font-mono text-sm"
+                rows={12}
+                placeholder="## Tasks&#10;- Task 1&#10;&#10;## Notes&#10;- Note 1"
+              />
+              {error && (
+                <p className="text-[var(--color-danger)] text-sm bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+                  {error}
+                </p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveInstructions}
+                  disabled={saving}
+                  className="btn btn-primary flex-1 disabled:opacity-50 text-sm"
+                >
+                  <Save className="w-4 h-4" />
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  disabled={saving}
+                  className="btn btn-ghost text-sm"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancel
+                </button>
+              </div>
             </div>
           ) : (
-            <p className="text-[var(--color-text-light)] italic text-sm">
-              No instructions provided.
-            </p>
+            <>
+              {zone.instructions ? (
+                <div className="zone-markdown">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {zone.instructions}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-[var(--color-text-light)] italic text-sm">
+                  No instructions provided.
+                </p>
+              )}
+            </>
           )}
         </div>
 

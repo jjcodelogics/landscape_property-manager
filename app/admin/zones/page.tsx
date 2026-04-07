@@ -87,7 +87,7 @@ export default function AdminZonesPage() {
     setDrawnGeojson(zone.geojson);
     setFormData({
       title: zone.title,
-      name: zone.name,
+      name: zone.name || '',
       type: zone.type,
       instructions: zone.instructions || '',
       last_worked_at: zone.last_worked_at ? zone.last_worked_at.slice(0, 16) : '',
@@ -178,6 +178,15 @@ export default function AdminZonesPage() {
         </div>
       </div>
 
+      {/* Instructions banner when no form is showing */}
+      {!showForm && (
+        <div className="px-4 py-3 bg-blue-50 border-b border-blue-200">
+          <p className="text-sm text-blue-900">
+            <span className="font-semibold">💡 To add a new zone:</span> Use the drawing tools in the top-left corner of the map (polygon or rectangle icon) to draw a zone, then fill in the details.
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Map */}
         <div className="relative h-64 sm:h-80 lg:h-auto lg:flex-1">
@@ -211,7 +220,7 @@ export default function AdminZonesPage() {
                   <input
                     type="text"
                     value={formData.title}
-                    onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
+                    onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, title: e.target.value }))}
                     className="input"
                     placeholder="e.g. North Lawn"
                     required
@@ -225,7 +234,7 @@ export default function AdminZonesPage() {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, name: e.target.value }))}
                     className="input"
                     placeholder="e.g. North Entrance Lawn"
                   />
@@ -240,7 +249,7 @@ export default function AdminZonesPage() {
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => setFormData((p) => ({ ...p, type: opt.value }))}
+                        onClick={() => setFormData((p: ZoneFormData) => ({ ...p, type: opt.value }))}
                         className={`py-2.5 px-3 rounded-xl text-sm font-semibold border-2 transition-all active:scale-95 touch-manipulation ${
                           formData.type === opt.value
                             ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
@@ -260,7 +269,7 @@ export default function AdminZonesPage() {
                   </label>
                   <textarea
                     value={formData.instructions}
-                    onChange={(e) => setFormData((p) => ({ ...p, instructions: e.target.value }))}
+                    onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, instructions: e.target.value }))}
                     className="input resize-none"
                     placeholder={INSTRUCTIONS_PLACEHOLDER}
                     rows={5}
@@ -275,7 +284,7 @@ export default function AdminZonesPage() {
                     <input
                       type="datetime-local"
                       value={formData.last_worked_at}
-                      onChange={(e) => setFormData((p) => ({ ...p, last_worked_at: e.target.value }))}
+                      onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, last_worked_at: e.target.value }))}
                       className="input"
                     />
                   </div>
@@ -287,7 +296,7 @@ export default function AdminZonesPage() {
                     <input
                       type="datetime-local"
                       value={formData.next_scheduled_work}
-                      onChange={(e) => setFormData((p) => ({ ...p, next_scheduled_work: e.target.value }))}
+                      onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, next_scheduled_work: e.target.value }))}
                       className="input"
                     />
                   </div>
@@ -327,15 +336,18 @@ export default function AdminZonesPage() {
             {loading ? (
               <p className="text-[var(--color-text-light)] text-sm text-center py-6">Loading…</p>
             ) : zones.length === 0 ? (
-              <div className="text-center py-10">
-                <MapPin className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-light)]" />
-                <p className="text-[var(--color-text-light)] text-sm italic">
-                  No zones yet. Use the draw tool on the map.
+              <div className="text-center py-10 px-4">
+                <MapPin className="w-10 h-10 mx-auto mb-3 text-[var(--color-text-light)]" />
+                <p className="text-[var(--color-text)] font-semibold mb-2">
+                  No zones yet
+                </p>
+                <p className="text-[var(--color-text-light)] text-sm">
+                  Click the <strong>polygon</strong> or <strong>rectangle</strong> icon in the top-left corner of the map to start drawing your first zone.
                 </p>
               </div>
             ) : (
               <ul className="space-y-2">
-                {zones.map((zone) => {
+                {zones.map((zone: Zone) => {
                   const badge = zone.type === 'grass' ? 'badge-grass' : zone.type === 'waste' ? 'badge-waste' : 'badge-maintenance';
                   const lastWorked = zone.last_worked_at 
                     ? new Date(zone.last_worked_at).toLocaleDateString() 

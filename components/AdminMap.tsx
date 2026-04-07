@@ -45,6 +45,9 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
     drawnItemsRef.current = drawnItems;
 
     import('leaflet-draw').then(() => {
+      // Check if map is still mounted and initialized
+      if (!mapRef.current || !map._loaded) return;
+
       // Type for Leaflet Draw control
       const LDrawControl = (L.Control as any).Draw;
       

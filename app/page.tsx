@@ -1,11 +1,10 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TaskForm from '@/components/TaskForm';
 import { Zone } from '@/lib/types';
-import { HARDCODED_ZONES } from '@/lib/zones';
 import { BarChart2, Settings, Leaf } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,9 +17,37 @@ const ZONE_TYPE_SWATCHES = [
 ];
 
 export default function Home() {
-  const [zones] = useState<Zone[]>(HARDCODED_ZONES);
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
+
+  const loadZones = useCallback(async () => {
+    try {
+      const res = await fetch('/api/zones');
+      if (res.ok) {
+        const data = await res.json();
+        setZones(Array.isArray(data) ? data : []);
+        
+        // Update selected zone if it's currently open
+        if (selectedZone) {
+          const updatedZone = data.find((z: Zone) => z.id === selectedZone.id);
+          if (updatedZone) {
+            setSelectedZone(updatedZone);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load zones:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedZone]);
+
+  useEffect(() => {
+    loadZones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleZoneClick = useCallback((zone: Zone) => {
     setSelectedZone(zone);
@@ -89,11 +116,22 @@ export default function Home() {
 
       {/* ── Map ── */}
       <div className="w-full h-full">
-        <Map
-          zones={zones}
-          selectedZoneId={selectedZone?.id || null}
-          onZoneClick={handleZoneClick}
-        />
+        {loading ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-white text-center">
+              <div className="animate-pulse mb-2">
+                <Leaf className="w-8 h-8 mx-auto opacity-70" />
+              </div>
+              <p className="text-sm opacity-70">Loading zones...</p>
+            </div>
+          </div>
+        ) : (
+          <Map
+            zones={zones}
+            selectedZoneId={selectedZone?.id || null}
+            onZoneClick={handleZoneClick}
+          />
+        )}
       </div>
 
       {/* ── Sidebar ── */}
@@ -102,6 +140,7 @@ export default function Home() {
           zone={selectedZone}
           onClose={handleCloseSidebar}
           onLogTask={handleLogTask}
+          onZoneUpdated={loadZones}
         />
       )}
 

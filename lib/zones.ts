@@ -6,7 +6,7 @@ import { Zone } from './types';
  */
 export const HARDCODED_ZONES: Zone[] = [
   {
-    id: '0EE3CPeYJzcQY8sBcpVdOvFIFHEb72No',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     title: 'North Entrance Lawn',
     name: 'North Entrance Lawn',
     type: 'grass',
@@ -49,7 +49,7 @@ export const HARDCODED_ZONES: Zone[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: 'PpRawkTr8lzY2eYOl6U90MfPqb5AEZ2g',
+    id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
     title: 'Main Parking Area',
     name: 'Main Parking Area',
     type: 'waste',
@@ -96,7 +96,7 @@ export const HARDCODED_ZONES: Zone[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: '2sXdrmK1HiS6sI1U4tShKqFXIhMHiJLk',
+    id: '6ba7b811-9dad-11d1-80b4-00c04fd430c8',
     title: 'East Building Maintenance',
     name: 'East Building Maintenance',
     type: 'maintenance',
@@ -147,7 +147,7 @@ export const HARDCODED_ZONES: Zone[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: 'DEcoKEMoCxikArLCYD8jKe0VgeL43fze',
+    id: '6ba7b812-9dad-11d1-80b4-00c04fd430c8',
     title: 'Storage Yard',
     name: 'Storage Yard',
     type: 'maintenance',
@@ -192,7 +192,7 @@ export const HARDCODED_ZONES: Zone[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: 'Kntg7nIgjZKRgC85XnaeUdvXXGrdPh83',
+    id: '6ba7b813-9dad-11d1-80b4-00c04fd430c8',
     title: 'South Sports Field',
     name: 'South Sports Field',
     type: 'grass',
@@ -239,7 +239,7 @@ export const HARDCODED_ZONES: Zone[] = [
     created_at: new Date().toISOString(),
   },
   {
-    id: 'FeEIfEQ2g7lcw0EDdjkSahYsr9nBQKO0',
+    id: '6ba7b814-9dad-11d1-80b4-00c04fd430c8',
     title: 'Central Garden',
     name: 'Central Garden',
     type: 'grass',
