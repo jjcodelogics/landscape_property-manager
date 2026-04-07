@@ -1,15 +1,31 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { sanitizeErrorMessage } from '@/lib/validation';
+import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 
-export async function GET() {
-  const { data: tasks, error: tasksError } = await supabase
-    .from('tasks')
-    .select('*, zones(id, name, type)')
-    .order('created_at', { ascending: false });
-
-  if (tasksError) {
-    return NextResponse.json({ error: tasksError.message }, { status: 500 });
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResult = checkRateLimit(request);
+  if (!rateLimitResult.success) {
+    return rateLimitExceeded(rateLimitResult);
   }
+
+  try {
+    const { data: tasks, error: tasksError } = await supabase
+      .from('tasks')
+      .select('*, zones(id, name, type)')
+      .order('created_at', { ascending: false });
+
+    if (tasksError) {
+      console.error('Database error:', tasksError);
+      return NextResponse.json(
+        { error: sanitizeErrorMessage(tasksError) },
+        { 
+          status: 500,
+          headers: getRateLimitHeaders(rateLimitResult),
+        }
+      );
+    }
 
   const zoneStatsMap: Record<string, { zone_name: string; total_minutes: number; task_count: number }> = {};
   
@@ -42,9 +58,24 @@ export async function GET() {
   
   const weeklyTotal = weeklyTasks.reduce((sum, t) => sum + t.duration_minutes, 0);
 
-  return NextResponse.json({
-    zoneStats,
-    weeklyTotal,
-    recentTasks: (tasks || []).slice(0, 10),
-  });
+    return NextResponse.json(
+      {
+        zoneStats,
+        weeklyTotal,
+        recentTasks: (tasks || []).slice(0, 10),
+      },
+      {
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      { error: sanitizeErrorMessage(error) },
+      { 
+        status: 500,
+        headers: getRateLimitHeaders(rateLimitResult),
+      }
+    );
+  }
 }

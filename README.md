@@ -52,3 +52,58 @@ Open [http://localhost:3000](http://localhost:3000) to see the app.
 | GET | `/api/tasks` | List recent tasks |
 | POST | `/api/tasks` | Log a task |
 | GET | `/api/stats` | Get zone statistics |
+
+## Deployment to Vercel
+
+### Prerequisites
+1. A [Vercel account](https://vercel.com/signup) (free tier works great)
+2. A Supabase project with the schema from `supabase/schema.sql` applied
+3. Your Supabase URL and anon key ready
+
+### Deploy Steps
+
+#### Option 1: Deploy via Vercel Dashboard
+1. Push your code to GitHub, GitLab, or Bitbucket
+2. Go to [vercel.com/new](https://vercel.com/new)
+3. Import your repository
+4. Configure environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon/public key
+5. Click **Deploy**
+
+#### Option 2: Deploy via Vercel CLI
+```bash
+# Install Vercel CLI globally
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy (follow prompts)
+vercel
+
+# For production deployment
+vercel --prod
+```
+
+### Setting Environment Variables
+
+In your Vercel project dashboard:
+1. Go to **Settings** → **Environment Variables**
+2. Add each variable from `.env.example`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Select which environments (Production, Preview, Development)
+4. Click **Save**
+
+### Post-Deployment
+- Your app will be live at `https://your-project.vercel.app`
+- Vercel automatically handles SSL certificates
+- Every git push triggers a new deployment
+- Preview deployments are created for branches and PRs
+
+### Troubleshooting
+- **Build errors**: Check the build logs in Vercel dashboard
+- **Environment variables not working**: Ensure they're prefixed with `NEXT_PUBLIC_` and redeploy
+- **Map not loading**: Check browser console for CORS or API errors
+- **Database errors**: Verify Supabase credentials and RLS policies

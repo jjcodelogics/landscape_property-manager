@@ -27,9 +27,12 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+    // Center on the actual property location (DonkerGroep facility)
     const map = L.map(mapContainerRef.current, {
-      center: [51.505, -0.09],
+      center: [52.9815, 6.5737],
       zoom: 16,
+      minZoom: 14,
+      maxZoom: 20,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
