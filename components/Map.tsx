@@ -6,9 +6,9 @@ import 'leaflet/dist/leaflet.css';
 import { Zone } from '@/lib/types';
 
 const ZONE_COLORS: Record<string, string> = {
-  grass: '#22c55e',
-  waste: '#f97316',
-  maintenance: '#3b82f6',
+  grass: '#22c55e',      // green
+  waste: '#3b82f6',      // blue
+  maintenance: '#f97316', // orange
 };
 
 interface MapProps {
@@ -25,10 +25,19 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
+    // Define terrain bounding box (adjusted for hardcoded zones in Netherlands)
+    const terrainBounds: L.LatLngBoundsExpression = [
+      [52.899, 6.499],  // Southwest corner
+      [52.904, 6.509],  // Northeast corner
+    ];
+
     const map = L.map(mapContainerRef.current, {
-      center: [51.505, -0.09],
+      center: [52.9015, 6.504],    // Center of the zones area
       zoom: 16,
       zoomControl: true,
+      minZoom: 14,                    // Prevent zooming out too far
+      maxBounds: terrainBounds,      // Restrict panning to terrain area
+      maxBoundsViscosity: 1.0,       // Hard boundary (1.0 = cannot pan outside)
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -60,18 +69,28 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
           color: isSelected ? '#ffffff' : color,
           fillColor: color,
           fillOpacity: isSelected ? 0.7 : 0.4,
-          weight: isSelected ? 3 : 2,
+          weight: isSelected ? 4 : 2,
         },
       });
 
       layer.on('click', () => onZoneClick(zone));
-      layer.on('mouseover', () => {
-        layer.setStyle({ fillOpacity: 0.6, weight: 3 });
+      
+      // Enhanced hover effect
+      layer.on('mouseover', (e) => {
+        const target = e.target;
+        target.setStyle({ 
+          fillOpacity: 0.65,
+          weight: 4,
+          color: '#ffffff',
+        });
       });
-      layer.on('mouseout', () => {
-        layer.setStyle({
+      
+      layer.on('mouseout', (e) => {
+        const target = e.target;
+        target.setStyle({
+          color: isSelected ? '#ffffff' : color,
           fillOpacity: isSelected ? 0.7 : 0.4,
-          weight: isSelected ? 3 : 2,
+          weight: isSelected ? 4 : 2,
         });
       });
 

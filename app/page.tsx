@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TaskForm from '@/components/TaskForm';
 import { Zone } from '@/lib/types';
+import { HARDCODED_ZONES } from '@/lib/zones';
 import { BarChart2, Settings } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,16 +18,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/zones')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        setZones(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    // Using hardcoded zones for testing map interaction
+    // TODO: Replace with API call when database is ready
+    setZones(HARDCODED_ZONES);
+    setLoading(false);
   }, []);
 
   const handleZoneClick = useCallback((zone: Zone) => {
