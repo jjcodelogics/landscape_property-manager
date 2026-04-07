@@ -32,10 +32,11 @@ export default function AdminZonesPage() {
   const loadZones = async () => {
     try {
       const res = await fetch('/api/zones');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setZones(Array.isArray(data) ? data : []);
     } catch {
-      // ignore
+      // ignore – zones will remain empty
     } finally {
       setLoading(false);
     }

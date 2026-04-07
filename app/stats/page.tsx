@@ -35,13 +35,16 @@ export default function StatsPage() {
 
   useEffect(() => {
     fetch('/api/stats')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then((data) => {
         setStats(data);
         setLoading(false);
       })
       .catch(() => {
-        setError('Failed to load statistics');
+        setError('Failed to load statistics. Check your Supabase configuration.');
         setLoading(false);
       });
   }, []);
@@ -107,7 +110,7 @@ export default function StatsPage() {
                         {formatMinutes(zs.total_minutes)}
                       </p>
                       <p className="text-sm text-gray-500">
-                        avg {formatMinutes(zs.avg_minutes)}
+                        Avg {formatMinutes(zs.avg_minutes)}
                       </p>
                     </div>
                   </div>

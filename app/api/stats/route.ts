@@ -29,7 +29,7 @@ export async function GET() {
     zone_id,
     zone_name: stats.zone_name,
     total_minutes: stats.total_minutes,
-    avg_minutes: Math.round(stats.total_minutes / stats.task_count),
+    avg_minutes: stats.task_count > 0 ? Math.round(stats.total_minutes / stats.task_count) : 0,
     task_count: stats.task_count,
   }));
 
