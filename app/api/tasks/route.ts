@@ -5,6 +5,9 @@ import {
   validateTaskType,
   validateUUID,
   validatePositiveInteger,
+  validateWeatherCondition,
+  validateDifficulty,
+  validateTaskMode,
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
@@ -14,6 +17,11 @@ interface CreateTaskRequest {
   task_type: string;
   duration_minutes: number;
   notes?: string;
+  weather_condition?: string;
+  difficulty?: string;
+  mode?: string;
+  productive_minutes?: number;
+  non_productive_minutes?: number;
 }
 
 export async function GET(request: NextRequest) {
@@ -103,10 +111,31 @@ export async function POST(request: NextRequest) {
       maxLength: 2000,
     });
 
+    // Optional extended fields
+    const weather_condition = body.weather_condition
+      ? validateWeatherCondition(body.weather_condition)
+      : null;
+    const difficulty = body.difficulty
+      ? validateDifficulty(body.difficulty)
+      : null;
+    const mode = body.mode
+      ? validateTaskMode(body.mode)
+      : null;
+    const productive_minutes = body.productive_minutes !== undefined
+      ? validatePositiveInteger(body.productive_minutes, 'Productive minutes', { min: 0, max: 1440 })
+      : 0;
+    const non_productive_minutes = body.non_productive_minutes !== undefined
+      ? validatePositiveInteger(body.non_productive_minutes, 'Non-productive minutes', { min: 0, max: 1440 })
+      : 0;
+
     // Insert into database
     const { data, error } = await supabase
       .from('tasks')
-      .insert([{ zone_id, task_type, duration_minutes, notes }])
+      .insert([{
+        zone_id, task_type, duration_minutes, notes,
+        weather_condition, difficulty, mode,
+        productive_minutes, non_productive_minutes,
+      }])
       .select()
       .single();
 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Zone } from '@/lib/types';
-import { X, ClipboardList, Edit3, Save, XCircle } from 'lucide-react';
+import { X, ClipboardList, Edit3, Save, XCircle, Tag, Ruler } from 'lucide-react';
 
 const ZONE_TYPE_LABELS: Record<string, string> = {
   grass:       'Grass',
@@ -53,6 +53,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
           type: zone.type,
           instructions: editedInstructions,
           geojson: zone.geojson,
+          tags: zone.tags,
           last_worked_at: zone.last_worked_at,
           next_scheduled_work: zone.next_scheduled_work,
         }),
@@ -121,7 +122,28 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
               >
                 {ZONE_TYPE_LABELS[zone.type] || zone.type}
               </span>
+              {zone.area_m2 != null && zone.area_m2 > 0 && (
+                <span className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
+                  <Ruler className="w-3 h-3" />
+                  {zone.area_m2.toLocaleString()} m²
+                </span>
+              )}
             </div>
+            {/* Tags */}
+            {zone.tags && zone.tags.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                <Tag className="w-3 h-3 text-[var(--color-text-light)]" />
+                {zone.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-0.5 rounded-full text-xs font-medium"
+                    style={{ background: 'rgba(10,147,150,0.12)', color: 'var(--color-secondary)' }}
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
             {(zone.last_worked_at || zone.next_scheduled_work) && (
               <div className="mt-2 text-xs space-y-0.5">
                 {zone.last_worked_at && (

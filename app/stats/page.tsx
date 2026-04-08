@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Clock, Leaf, AlertCircle, BarChart2 } from 'lucide-react';
-import { ZoneStats, TaskWithZone } from '@/lib/types';
+import { ArrowLeft, Clock, Leaf, AlertCircle, BarChart2 } from 'lucide-react';import { ZoneStats, TaskWithZone } from '@/lib/types';
 
 interface StatsData {
   zoneStats: ZoneStats[];
@@ -112,7 +111,7 @@ export default function StatsPage() {
             <p className="text-xs font-bold uppercase tracking-wider">This Week</p>
           </div>
           <p className="text-4xl font-bold">{formatMinutes(stats?.weeklyTotal || 0)}</p>
-          <p className="text-sm mt-1 opacity-75">Total time logged in last 7 days</p>
+        <p className="text-sm mt-1 opacity-75">Total time logged in last 7 days · <Link href="/kpi" className="underline">View KPI →</Link></p>
         </div>
 
         {/* Time per zone */}
