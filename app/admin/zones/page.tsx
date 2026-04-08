@@ -8,19 +8,19 @@ import { Zone, ZoneType } from '@/lib/types';
 
 const AdminMap = dynamic(() => import('@/components/AdminMap'), { ssr: false });
 
-const INSTRUCTIONS_TEMPLATE = `## Tasks
+const INSTRUCTIONS_TEMPLATE = `## Taken
 
-## Notes
+## Notities
 
-## Key Info
-- Units (m²): 
-- Access: 
+## Belangrijke Informatie
+- Oppervlakte (m²): 
+- Toegang: 
 
 ## Contact
-- Facility Manager: 
-- Phone: 
+- Facilitair Manager: 
+- Telefoon: 
 
-## Quality Standards
+## Kwaliteitsnormen
 `;
 
 interface ZoneFormData {
@@ -34,9 +34,9 @@ interface ZoneFormData {
 }
 
 const ZONE_TYPE_OPTIONS: { value: ZoneType; label: string; badge: string }[] = [
-  { value: 'grass',       label: 'Grass',       badge: 'badge-grass' },
-  { value: 'waste',       label: 'Waste',        badge: 'badge-waste' },
-  { value: 'maintenance', label: 'Maintenance',  badge: 'badge-maintenance' },
+  { value: 'grass',       label: 'Grasonderhoud',       badge: 'badge-grass' },
+  { value: 'waste',       label: 'Afvalbeheer',        badge: 'badge-waste' },
+  { value: 'maintenance', label: 'Onderhoud',  badge: 'badge-maintenance' },
 ];
 
 export default function AdminZonesPage() {
@@ -110,11 +110,11 @@ export default function AdminZonesPage() {
 
   const handleSave = async () => {
     if (!formData.title.trim()) {
-      setError('Zone title is required');
+      setError('Zonetitel is verplicht');
       return;
     }
     if (!drawnGeojson) {
-      setError('Please draw a polygon on the map');
+      setError('Teken een polygoon op de kaart');
       return;
     }
 
@@ -133,7 +133,7 @@ export default function AdminZonesPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to save zone');
+        throw new Error(data.error || 'Mislukt om zone op te slaan');
       }
 
       await loadZones();
@@ -141,22 +141,22 @@ export default function AdminZonesPage() {
       setDrawnGeojson(null);
       setEditingZone(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Er is iets misgegaan');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (zoneId: string) => {
-    if (!confirm('Delete this zone? This will also delete all associated tasks.')) return;
+    if (!confirm('Deze zone verwijderen? Dit verwijdert ook alle bijbehorende taken.')) return;
     setDeletingId(zoneId);
 
     try {
       const res = await fetch(`/api/zones/${zoneId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
+      if (!res.ok) throw new Error('Mislukt om te verwijderen');
       await loadZones();
     } catch {
-      alert('Failed to delete zone');
+      alert('Mislukt om zone te verwijderen');
     } finally {
       setDeletingId(null);
     }
@@ -176,11 +176,11 @@ export default function AdminZonesPage() {
           href="/"
           className="p-2 rounded-full touch-manipulation flex-shrink-0"
           style={{ background: 'rgba(255,255,255,0.15)' }}
-          aria-label="Back to map"
+          aria-label="Terug naar kaart"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg font-bold text-white flex-1">Zone Editor</h1>
+        <h1 className="text-lg font-bold text-white flex-1">Zonebeheer</h1>
         <div
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
           style={{ background: 'rgba(255,255,255,0.15)' }}
@@ -194,7 +194,7 @@ export default function AdminZonesPage() {
       {!showForm && (
         <div className="px-4 py-3 bg-blue-50 border-b border-blue-200">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">💡 To add a new zone:</span> Use the drawing tools in the top-left corner of the map (polygon or rectangle icon) to draw a zone, then fill in the details.
+            <span className="font-semibold">💡 Om een nieuwe zone toe te voegen:</span> Gebruik de tekengereedschappen linksboven op de kaart (polygoon of rechthoek icoon) om een zone te tekenen, en vul vervolgens de details in.
           </p>
         </div>
       )}
@@ -220,41 +220,41 @@ export default function AdminZonesPage() {
               <div className="flex items-center gap-2 mb-4">
                 <PenSquare className="w-4 h-4 text-[var(--color-primary)]" />
                 <h2 className="font-bold text-[var(--color-text)]">
-                  {editingZone ? 'Edit Zone' : 'New Zone'}
+                  {editingZone ? 'Zone Bewerken' : 'Nieuwe Zone'}
                 </h2>
               </div>
 
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Title *
+                    Titel *
                   </label>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, title: e.target.value }))}
                     className="input"
-                    placeholder="e.g. North Lawn"
+                    placeholder="bijv. Noord Gazon"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Name
+                    Naam
                   </label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, name: e.target.value }))}
                     className="input"
-                    placeholder="e.g. North Entrance Lawn"
+                    placeholder="bijv. Noord Ingang Gazon"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Zone Type
+                    Zonetype
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {ZONE_TYPE_OPTIONS.map((opt) => (
@@ -276,8 +276,8 @@ export default function AdminZonesPage() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Instructions{' '}
-                    <span className="normal-case font-normal text-[var(--color-text-light)]">(Markdown supported)</span>
+                    Instructies{' '}
+                    <span className="normal-case font-normal text-[var(--color-text-light)]">(Markdown ondersteund)</span>
                   </label>
                   <textarea
                     value={formData.instructions}
@@ -290,7 +290,7 @@ export default function AdminZonesPage() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Tags <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+                    Tags <span className="normal-case font-normal text-[var(--color-text-light)]">(optioneel)</span>
                   </label>
                   <div className="flex gap-2 mb-2">
                     <input
@@ -308,7 +308,7 @@ export default function AdminZonesPage() {
                         }
                       }}
                       className="input flex-1"
-                      placeholder="Add tag, press Enter"
+                      placeholder="Tag toevoegen, druk op Enter"
                     />
                     <button
                       type="button"
@@ -321,7 +321,7 @@ export default function AdminZonesPage() {
                       }}
                       className="btn btn-ghost text-sm px-3"
                     >
-                      Add
+                      Toevoegen
                     </button>
                   </div>
                   {formData.tags.length > 0 && (
@@ -332,7 +332,7 @@ export default function AdminZonesPage() {
                           className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer"
                           style={{ background: 'rgba(10,147,150,0.12)', color: 'var(--color-secondary)' }}
                           onClick={() => setFormData((p: ZoneFormData) => ({ ...p, tags: p.tags.filter((t) => t !== tag) }))}
-                          title="Click to remove"
+                          title="Klik om te verwijderen"
                         >
                           #{tag} ×
                         </span>
@@ -344,7 +344,7 @@ export default function AdminZonesPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                      Last Worked At
+                      Laatst Bewerkt Op
                     </label>
                     <input
                       type="datetime-local"
@@ -356,7 +356,7 @@ export default function AdminZonesPage() {
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                      Next Scheduled Work
+                      Volgend Gepland Werk
                     </label>
                     <input
                       type="datetime-local"
@@ -379,13 +379,13 @@ export default function AdminZonesPage() {
                     disabled={saving}
                     className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {saving ? 'Saving…' : editingZone ? 'Update Zone' : 'Save Zone'}
+                    {saving ? 'Opslaan…' : editingZone ? 'Zone Bijwerken' : 'Zone Opslaan'}
                   </button>
                   <button
                     onClick={() => { setShowForm(false); setDrawnGeojson(null); setEditingZone(null); setTagInput(''); }}
                     className="btn btn-ghost"
                   >
-                    Cancel
+                    Annuleren
                   </button>
                 </div>
               </div>
@@ -395,19 +395,19 @@ export default function AdminZonesPage() {
           {/* Zone list */}
           <div className="p-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-4">
-              All Zones
+              Alle Zones
             </h2>
 
             {loading ? (
-              <p className="text-[var(--color-text-light)] text-sm text-center py-6">Loading…</p>
+              <p className="text-[var(--color-text-light)] text-sm text-center py-6">Laden…</p>
             ) : zones.length === 0 ? (
               <div className="text-center py-10 px-4">
                 <MapPin className="w-10 h-10 mx-auto mb-3 text-[var(--color-text-light)]" />
                 <p className="text-[var(--color-text)] font-semibold mb-2">
-                  No zones yet
+                  Nog geen zones
                 </p>
                 <p className="text-[var(--color-text-light)] text-sm">
-                  Click the <strong>polygon</strong> or <strong>rectangle</strong> icon in the top-left corner of the map to start drawing your first zone.
+                  Klik op het <strong>polygoon</strong> of <strong>rechthoek</strong> icoon linksboven op de kaart om uw eerste zone te tekenen.
                 </p>
               </div>
             ) : (
@@ -443,12 +443,12 @@ export default function AdminZonesPage() {
                           )}
                           {lastWorked && (
                             <span className="text-xs text-[var(--color-text-muted)]">
-                              Last: {lastWorked}
+                              Laatst: {lastWorked}
                             </span>
                           )}
                           {nextWork && (
                             <span className="text-xs text-[var(--color-secondary)] font-medium">
-                              Next: {nextWork}
+                              Volgend: {nextWork}
                             </span>
                           )}
                         </div>
@@ -467,8 +467,8 @@ export default function AdminZonesPage() {
                           onClick={() => handleEditZone(zone)}
                           className="p-2.5 rounded-xl transition-colors touch-manipulation"
                           style={{ color: 'var(--color-secondary)' }}
-                          title="Edit zone"
-                          aria-label={`Edit ${zone.title}`}
+                          title="Bewerk zone"
+                          aria-label={`Bewerk ${zone.title}`}
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -477,8 +477,8 @@ export default function AdminZonesPage() {
                           disabled={deletingId === zone.id}
                           className="p-2.5 rounded-xl transition-colors disabled:opacity-50 touch-manipulation"
                           style={{ color: 'var(--color-danger)' }}
-                          title="Delete zone"
-                          aria-label={`Delete ${zone.title}`}
+                          title="Verwijder zone"
+                          aria-label={`Verwijder ${zone.title}`}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -7,9 +7,9 @@ import { Zone } from '@/lib/types';
 import { X, ClipboardList, Edit3, Save, XCircle, Tag, Ruler } from 'lucide-react';
 
 const ZONE_TYPE_LABELS: Record<string, string> = {
-  grass:       'Grass',
-  waste:       'Waste',
-  maintenance: 'Maintenance',
+  grass:       'Grasonderhoud',
+  waste:       'Afvalbeheer',
+  maintenance: 'Onderhoud',
 };
 
 interface SidebarProps {
@@ -61,14 +61,14 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to update instructions');
+        throw new Error(data.error || 'Mislukt om instructies bij te werken');
       }
 
       setIsEditingInstructions(false);
       zone.instructions = editedInstructions; // Update local state
       onZoneUpdated?.(); // Notify parent to refresh
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Er is iets misgegaan');
     } finally {
       setSaving(false);
     }
@@ -148,12 +148,12 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
               <div className="mt-2 text-xs space-y-0.5">
                 {zone.last_worked_at && (
                   <p className="text-[var(--color-text-muted)]">
-                    Last worked: {new Date(zone.last_worked_at).toLocaleDateString()}
+                    Laatst bewerkt: {new Date(zone.last_worked_at).toLocaleDateString('nl-NL')}
                   </p>
                 )}
                 {zone.next_scheduled_work && (
                   <p className="text-[var(--color-secondary)] font-medium">
-                    Next scheduled: {new Date(zone.next_scheduled_work).toLocaleDateString()}
+                    Volgend gepland: {new Date(zone.next_scheduled_work).toLocaleDateString('nl-NL')}
                   </p>
                 )}
               </div>
@@ -162,7 +162,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
           <button
             onClick={onClose}
             className="flex-shrink-0 p-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors touch-manipulation"
-            aria-label="Close sidebar"
+            aria-label="Sluit zijbalk"
           >
             <X className="w-5 h-5 text-[var(--color-text-muted)]" />
           </button>
@@ -172,16 +172,16 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
-              Instructions
+              Instructies
             </h3>
             {!isEditingInstructions && (
               <button
                 onClick={handleStartEdit}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-secondary)] hover:bg-[var(--color-bg)] transition-colors touch-manipulation"
-                aria-label="Edit instructions"
+                aria-label="Bewerk instructies"
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                Edit
+                Bewerken
               </button>
             )}
           </div>
@@ -193,7 +193,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
                 onChange={(e) => setEditedInstructions(e.target.value)}
                 className="input resize-none font-mono text-sm"
                 rows={12}
-                placeholder="## Tasks&#10;- Task 1&#10;&#10;## Notes&#10;- Note 1"
+                placeholder="## Taken&#10;- Taak 1&#10;&#10;## Notities&#10;- Notitie 1"
               />
               {error && (
                 <p className="text-[var(--color-danger)] text-sm bg-red-50 px-3 py-2 rounded-lg border border-red-200">
@@ -207,7 +207,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
                   className="btn btn-primary flex-1 disabled:opacity-50 text-sm"
                 >
                   <Save className="w-4 h-4" />
-                  {saving ? 'Saving...' : 'Save'}
+                  {saving ? 'Opslaan...' : 'Opslaan'}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -215,7 +215,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
                   className="btn btn-ghost text-sm"
                 >
                   <XCircle className="w-4 h-4" />
-                  Cancel
+                  Annuleren
                 </button>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
                 </div>
               ) : (
                 <p className="text-[var(--color-text-light)] italic text-sm">
-                  No instructions provided.
+                  Geen instructies beschikbaar.
                 </p>
               )}
             </>
@@ -246,7 +246,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
             className="btn btn-primary w-full text-base"
           >
             <ClipboardList className="w-5 h-5" />
-            Log Task
+            Taak Registreren
           </button>
         </div>
       </div>

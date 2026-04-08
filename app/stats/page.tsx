@@ -59,7 +59,7 @@ export default function StatsPage() {
       <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--color-bg)' }}>
         <div className="text-center">
           <BarChart2 className="w-10 h-10 mx-auto mb-3 text-[var(--color-secondary)]" />
-          <p className="text-[var(--color-text-muted)] font-medium">Loading statistics…</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Statistieken laden…</p>
         </div>
       </div>
     );
@@ -94,7 +94,7 @@ export default function StatsPage() {
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg font-bold text-white flex-1">Statistics</h1>
+        <h1 className="text-lg font-bold text-white flex-1">Statistieken</h1>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
@@ -108,17 +108,17 @@ export default function StatsPage() {
         >
           <div className="flex items-center gap-2 mb-2 opacity-80">
             <Clock className="w-4 h-4" />
-            <p className="text-xs font-bold uppercase tracking-wider">This Week</p>
+            <p className="text-xs font-bold uppercase tracking-wider">Deze Week</p>
           </div>
           <p className="text-4xl font-bold">{formatMinutes(stats?.weeklyTotal || 0)}</p>
-        <p className="text-sm mt-1 opacity-75">Total time logged in last 7 days · <Link href="/kpi" className="underline">View KPI →</Link></p>
+        <p className="text-sm mt-1 opacity-75">Totale tijd geregistreerd in de afgelopen 7 dagen · <Link href="/kpi" className="underline">Bekijk KPI →</Link></p>
         </div>
 
         {/* Time per zone */}
         <div className="card overflow-hidden">
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-              Time Per Zone
+              Tijd Per Zone
             </h2>
           </div>
           {stats?.zoneStats && stats.zoneStats.length > 0 ? (
@@ -137,7 +137,7 @@ export default function StatsPage() {
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-[var(--color-text)] truncate">{zs.zone_name}</p>
                         <p className="text-sm text-[var(--color-text-muted)] mt-0.5">
-                          {zs.task_count} task{zs.task_count !== 1 ? 's' : ''} · avg {formatMinutes(zs.avg_minutes)}
+                          {zs.task_count} ta{zs.task_count !== 1 ? 'ken' : 'ak'} · gem. {formatMinutes(zs.avg_minutes)}
                         </p>
                       </div>
                       <p className="font-bold text-[var(--color-text)] flex-shrink-0">{formatMinutes(zs.total_minutes)}</p>
@@ -156,7 +156,7 @@ export default function StatsPage() {
           ) : (
             <div className="px-5 py-12 text-center">
               <Leaf className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-light)]" />
-              <p className="text-[var(--color-text-light)] italic text-sm">No tasks logged yet.</p>
+              <p className="text-[var(--color-text-light)] italic text-sm">Nog geen taken geregistreerd.</p>
             </div>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function StatsPage() {
         <div className="card overflow-hidden">
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-              Recent Activity
+              Recente Activiteiten
             </h2>
           </div>
           {stats?.recentTasks && stats.recentTasks.length > 0 ? (
@@ -179,7 +179,7 @@ export default function StatsPage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-[var(--color-text)] truncate">
-                        {task.zones?.title || 'Unknown Zone'}
+                        {task.zones?.title || 'Onbekende Zone'}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${TASK_TYPE_BADGE[task.task_type] || ''}`}>

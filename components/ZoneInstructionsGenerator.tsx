@@ -61,7 +61,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
         <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-[var(--color-primary)]" />
-            <h3 className="text-lg font-bold text-[var(--color-text)]">Zone Instructions</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text)]">Zoneinstructies</h3>
           </div>
           <button onClick={onClose} className="p-2 rounded-full hover:bg-[var(--color-bg)] transition-colors touch-manipulation" aria-label="Close">
             <X className="w-5 h-5 text-[var(--color-text-muted)]" />
@@ -72,7 +72,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
           {/* Zone selector */}
           <div className="sm:w-56 flex-shrink-0 overflow-y-auto" style={{ borderRight: '1px solid var(--color-border)' }}>
             <p className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] sticky top-0 bg-[var(--color-surface-2)]" style={{ borderBottom: '1px solid var(--color-border)' }}>
-              Select Zones
+              Selecteer Zones
             </p>
             <ul className="p-2 space-y-1">
               {zones.map((zone) => {
@@ -108,7 +108,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 flex-shrink-0" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
               <p className="text-xs font-semibold text-[var(--color-text-muted)]">
-                {selectedIds.length} zone{selectedIds.length !== 1 ? 's' : ''} selected
+                {selectedIds.length} zone{selectedIds.length !== 1 ? 's' : ''} geselecteerd
               </p>
               {selectedIds.length > 0 && (
                 <button
@@ -117,7 +117,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
                   style={{ background: 'var(--color-primary)', color: 'white' }}
                 >
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  {copied ? 'Copied!' : 'Copy All'}
+                  {copied ? 'Gekopieerd!' : 'Alles Kopiëren'}
                 </button>
               )}
             </div>
@@ -125,7 +125,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
               {selectedIds.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-10">
                   <FileText className="w-10 h-10 mb-3 text-[var(--color-text-light)]" />
-                  <p className="text-[var(--color-text-light)] italic text-sm">Select zones on the left to preview their combined instructions.</p>
+                  <p className="text-[var(--color-text-light)] italic text-sm">Selecteer zones aan de linkerkant om hun gecombineerde instructies te bekijken.</p>
                 </div>
               ) : (
                 <div className="space-y-8">

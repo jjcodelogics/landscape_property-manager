@@ -69,7 +69,7 @@ export default function PlanPage() {
 
   const handleSave = async () => {
     if (selectedZoneIds.length === 0) {
-      setError('Select at least one zone');
+      setError('Selecteer minimaal één zone');
       return;
     }
     setSaving(true);
@@ -88,13 +88,13 @@ export default function PlanPage() {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to save plan');
+        throw new Error(data.error || 'Mislukt om plan op te slaan');
       }
       setSelectedZoneIds([]);
       setNotes('');
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Er is iets misgegaan');
     } finally {
       setSaving(false);
     }
@@ -127,11 +127,11 @@ export default function PlanPage() {
           href="/"
           className="p-2 rounded-full touch-manipulation flex-shrink-0"
           style={{ background: 'rgba(255,255,255,0.15)' }}
-          aria-label="Back to map"
+          aria-label="Terug naar kaart"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg font-bold text-white flex-1">Daily Plan</h1>
+        <h1 className="text-lg font-bold text-white flex-1">Dagplanning</h1>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
@@ -139,7 +139,7 @@ export default function PlanPage() {
         <div className="card overflow-hidden">
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-              New Plan
+              Nieuw Plan
             </h2>
           </div>
           <div className="p-5 space-y-4">
@@ -147,7 +147,7 @@ export default function PlanPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                  Date
+                  Datum
                 </label>
                 <input
                   type="date"
@@ -158,7 +158,7 @@ export default function PlanPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                  Team Members
+                  Teamleden
                 </label>
                 <input
                   type="number"
@@ -171,7 +171,7 @@ export default function PlanPage() {
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                  Hours/Person
+                  Uren/Persoon
                 </label>
                 <input
                   type="number"
@@ -188,10 +188,10 @@ export default function PlanPage() {
             {/* Zone selection */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                Select Zones
+                Selecteer Zones
               </label>
               {loading ? (
-                <p className="text-sm text-[var(--color-text-muted)] py-4 text-center">Loading zones…</p>
+                <p className="text-sm text-[var(--color-text-muted)] py-4 text-center">Zones laden…</p>
               ) : (
                 <ul className="space-y-1.5 max-h-64 overflow-y-auto">
                   {zones.map((zone) => {
@@ -224,7 +224,7 @@ export default function PlanPage() {
                               ~{formatMinutes(avg)}
                             </p>
                           ) : (
-                            <p className="text-xs text-[var(--color-text-light)]">no data</p>
+                            <p className="text-xs text-[var(--color-text-light)]">geen data</p>
                           )}
                         </div>
                       </li>
@@ -241,19 +241,19 @@ export default function PlanPage() {
                 style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
               >
                 <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
-                  Workload Summary
+                  Werklastverdeling
                 </p>
                 <div className="grid grid-cols-3 gap-3 text-center text-sm">
                   <div>
-                    <p className="text-[var(--color-text-muted)] text-xs">Estimated</p>
+                    <p className="text-[var(--color-text-muted)] text-xs">Geschat</p>
                     <p className="font-bold text-[var(--color-text)]">{formatMinutes(totalEstimatedMins)}</p>
                   </div>
                   <div>
-                    <p className="text-[var(--color-text-muted)] text-xs">Available</p>
+                    <p className="text-[var(--color-text-muted)] text-xs">Beschikbaar</p>
                     <p className="font-bold text-[var(--color-text)]">{formatMinutes(totalAvailableMins)}</p>
                   </div>
                   <div>
-                    <p className="text-[var(--color-text-muted)] text-xs">Coverage</p>
+                    <p className="text-[var(--color-text-muted)] text-xs">Dekking</p>
                     <p className={`font-bold ${coveragePct > 100 ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
                       {coveragePct}%
                     </p>
@@ -274,14 +274,14 @@ export default function PlanPage() {
             {/* Notes */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                Notes <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+                Notities <span className="normal-case font-normal text-[var(--color-text-light)]">(optioneel)</span>
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="input resize-none"
                 rows={2}
-                placeholder="Any notes for this day…"
+                placeholder="Eventuele notities voor deze dag…"
               />
             </div>
 
@@ -297,7 +297,7 @@ export default function PlanPage() {
               className="btn btn-primary w-full disabled:opacity-50"
             >
               <Plus className="w-4 h-4" />
-              {saving ? 'Saving…' : 'Save Plan'}
+              {saving ? 'Opslaan…' : 'Plan Opslaan'}
             </button>
           </div>
         </div>
@@ -306,15 +306,15 @@ export default function PlanPage() {
         <div className="card overflow-hidden">
           <div className="px-5 py-3.5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
             <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-              Saved Plans
+              Opgeslagen Plannen
             </h2>
           </div>
           {loading ? (
-            <div className="px-5 py-8 text-center text-[var(--color-text-muted)] text-sm">Loading…</div>
+            <div className="px-5 py-8 text-center text-[var(--color-text-muted)] text-sm">Laden…</div>
           ) : plans.length === 0 ? (
             <div className="px-5 py-10 text-center">
               <CalendarDays className="w-8 h-8 mx-auto mb-2 text-[var(--color-text-light)]" />
-              <p className="text-[var(--color-text-light)] italic text-sm">No plans yet.</p>
+              <p className="text-[var(--color-text-light)] italic text-sm">Nog geen plannen.</p>
             </div>
           ) : (
             <ul>
@@ -336,9 +336,9 @@ export default function PlanPage() {
                         </div>
                         <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] mb-2">
                           <Users className="w-3.5 h-3.5" />
-                          <span>{plan.team_members} member{plan.team_members !== 1 ? 's' : ''} · {plan.hours_per_member}h each</span>
+                          <span>{plan.team_members} persoon{plan.team_members !== 1 ? 'personen' : ''} · {plan.hours_per_member}u elk</span>
                           <Clock className="w-3.5 h-3.5 ml-1" />
-                          <span>{estimated > 0 ? formatMinutes(estimated) : '—'} est. / {formatMinutes(available)} avail.</span>
+                          <span>{estimated > 0 ? formatMinutes(estimated) : '—'} geschat / {formatMinutes(available)} beschikb.</span>
                         </div>
                         <div className="flex flex-wrap gap-1">
                           {planZones.map((z) => (
@@ -347,7 +347,7 @@ export default function PlanPage() {
                             </span>
                           ))}
                           {plan.zone_ids.length > planZones.length && (
-                            <span className="text-xs text-[var(--color-text-muted)]">+{plan.zone_ids.length - planZones.length} more</span>
+                            <span className="text-xs text-[var(--color-text-muted)]">+{plan.zone_ids.length - planZones.length} meer</span>
                           )}
                         </div>
                         {plan.notes && (
@@ -359,7 +359,7 @@ export default function PlanPage() {
                         disabled={deletingId === plan.id}
                         className="p-2 rounded-lg transition-colors touch-manipulation disabled:opacity-50"
                         style={{ color: 'var(--color-danger)' }}
-                        aria-label="Delete plan"
+                        aria-label="Verwijder plan"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

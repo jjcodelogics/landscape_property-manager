@@ -12,9 +12,9 @@ import Link from 'next/link';
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
 
 const ZONE_TYPE_SWATCHES = [
-  { type: 'grass',       color: '#6aa84f', label: 'Grass' },
-  { type: 'waste',       color: '#3d85c6', label: 'Waste' },
-  { type: 'maintenance', color: '#e69138', label: 'Maintenance' },
+  { type: 'grass',       color: '#6aa84f', label: 'Grasonderhoud' },
+  { type: 'waste',       color: '#3d85c6', label: 'Afvalbeheer' },
+  { type: 'maintenance', color: '#e69138', label: 'Onderhoud' },
 ];
 
 export default function Home() {
@@ -99,26 +99,26 @@ export default function Home() {
             onClick={() => setShowInstructions(true)}
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Zone instructions"
-            title="Zone Instructions Generator"
+            aria-label="Zoneinstructies"
+            title="Zoneinstructies Generator"
           >
             <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Instructions</span>
+            <span className="hidden sm:inline">Instructies</span>
           </button>
           <Link
             href="/plan"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Daily plan"
+            aria-label="Dagplanning"
           >
             <CalendarDays className="w-4 h-4" />
-            <span className="hidden sm:inline">Plan</span>
+            <span className="hidden sm:inline">Planning</span>
           </Link>
           <Link
             href="/routes"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Points and routes"
+            aria-label="Punten en routes"
           >
             <Route className="w-4 h-4" />
             <span className="hidden lg:inline">Routes</span>
@@ -127,7 +127,7 @@ export default function Home() {
             href="/kpi"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="KPI analytics"
+            aria-label="KPI analyses"
           >
             <TrendingUp className="w-4 h-4" />
             <span className="hidden lg:inline">KPI</span>
@@ -136,19 +136,19 @@ export default function Home() {
             href="/stats"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="View statistics"
+            aria-label="Bekijk statistieken"
           >
             <BarChart2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Stats</span>
+            <span className="hidden sm:inline">Statistieken</span>
           </Link>
           <Link
             href="/admin/zones"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Admin panel"
+            aria-label="Beheerpaneel"
           >
             <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Admin</span>
+            <span className="hidden sm:inline">Beheer</span>
           </Link>
         </nav>
       </header>
@@ -161,7 +161,7 @@ export default function Home() {
               <div className="animate-pulse mb-2">
                 <Leaf className="w-8 h-8 mx-auto opacity-70" />
               </div>
-              <p className="text-sm opacity-70">Loading zones...</p>
+              <p className="text-sm opacity-70">Zones laden...</p>
             </div>
           </div>
         ) : (

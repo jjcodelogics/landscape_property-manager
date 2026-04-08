@@ -65,11 +65,11 @@ export default function KpiPage() {
           href="/"
           className="p-2 rounded-full touch-manipulation"
           style={{ background: 'rgba(255,255,255,0.15)' }}
-          aria-label="Back to map"
+          aria-label="Terug naar kaart"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg font-bold text-white flex-1">KPI &amp; Analytics</h1>
+        <h1 className="text-lg font-bold text-white flex-1">KPI & Analyses</h1>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5 space-y-4">
@@ -80,7 +80,7 @@ export default function KpiPage() {
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-[var(--color-secondary)]" />
               <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-                Productive vs Non-Productive Time
+                Productieve vs Niet-Productieve Tijd
               </h2>
             </div>
           </div>
@@ -88,13 +88,13 @@ export default function KpiPage() {
             <div className="p-5">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(10,147,150,0.08)' }}>
-                  <p className="text-xs font-semibold text-[var(--color-secondary)] mb-1">⚡ Productive</p>
+                  <p className="text-xs font-semibold text-[var(--color-secondary)] mb-1">⚡ Productief</p>
                   <p className="text-2xl font-bold text-[var(--color-text)]">
                     {formatMinutes(kpi!.productiveRatio.productive_minutes)}
                   </p>
                 </div>
                 <div className="rounded-xl p-4 text-center" style={{ background: 'rgba(214,158,46,0.08)' }}>
-                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-warning)' }}>⏸ Non-Productive</p>
+                  <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-warning)' }}>⏸ Niet-Productief</p>
                   <p className="text-2xl font-bold text-[var(--color-text)]">
                     {formatMinutes(kpi!.productiveRatio.non_productive_minutes)}
                   </p>

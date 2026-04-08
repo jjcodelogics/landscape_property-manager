@@ -11,21 +11,21 @@ interface TaskFormProps {
 }
 
 const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = [
-  { value: 'mowing',      label: 'Mowing',      icon: <Scissors className="w-4 h-4" /> },
-  { value: 'waste',       label: 'Waste',        icon: <Trash2   className="w-4 h-4" /> },
-  { value: 'maintenance', label: 'Maintenance',  icon: <Wrench   className="w-4 h-4" /> },
+  { value: 'mowing',      label: 'Maaien',      icon: <Scissors className="w-4 h-4" /> },
+  { value: 'waste',       label: 'Afval',        icon: <Trash2   className="w-4 h-4" /> },
+  { value: 'maintenance', label: 'Onderhoud',  icon: <Wrench   className="w-4 h-4" /> },
 ];
 
 const WEATHER_OPTIONS: { value: WeatherCondition; label: string; emoji: string }[] = [
-  { value: 'good',   label: 'Good',   emoji: '☀️' },
-  { value: 'normal', label: 'Normal', emoji: '🌤️' },
-  { value: 'bad',    label: 'Bad',    emoji: '🌧️' },
+  { value: 'good',   label: 'Goed',   emoji: '☀️' },
+  { value: 'normal', label: 'Normaal', emoji: '🌤️' },
+  { value: 'bad',    label: 'Slecht',    emoji: '🌧️' },
 ];
 
 const DIFFICULTY_OPTIONS: { value: DifficultyLevel; label: string; emoji: string }[] = [
-  { value: 'normal', label: 'Normal', emoji: '🟢' },
-  { value: 'dirty',  label: 'Dirty',  emoji: '🟡' },
-  { value: 'heavy',  label: 'Heavy',  emoji: '🔴' },
+  { value: 'normal', label: 'Normaal', emoji: '🟢' },
+  { value: 'dirty',  label: 'Vuil',  emoji: '🟡' },
+  { value: 'heavy',  label: 'Zwaar',  emoji: '🔴' },
 ];
 
 const QUICK_MINUTES = [5, 10, 15, 30, 45, 60];
@@ -144,13 +144,13 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
           style={{ borderBottom: '1px solid var(--color-border)' }}
         >
           <div>
-            <h3 className="text-lg font-bold text-[var(--color-text)]">Log Task</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text)]">Taak Registreren</h3>
             <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{zone.title}</p>
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors touch-manipulation"
-            aria-label="Close"
+            aria-label="Sluiten"
           >
             <X className="w-5 h-5 text-[var(--color-text-muted)]" />
           </button>
@@ -160,7 +160,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
           {/* Task type selector */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
-              Task Type
+              Taaktype
             </label>
             <div className="grid grid-cols-3 gap-2">
               {TASK_TYPES.map((type) => {
@@ -187,7 +187,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
           {/* Weather */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
-              Weather <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+              Weer <span className="normal-case font-normal text-[var(--color-text-light)]">(optioneel)</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {WEATHER_OPTIONS.map((opt) => (
@@ -211,7 +211,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
           {/* Difficulty */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
-              Difficulty <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+              Moeilijkheidsgraad <span className="normal-case font-normal text-[var(--color-text-light)]">(optioneel)</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {DIFFICULTY_OPTIONS.map((opt) => (
@@ -238,21 +238,21 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
             style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
           >
             <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
-              Timer (optional)
+              Timer (optioneel)
             </p>
             <div className="grid grid-cols-2 gap-2 text-center">
               <div
                 className={`rounded-lg p-3 transition-all ${timerMode === 'productive' && timerRunning ? 'ring-2 ring-[var(--color-secondary)]' : ''}`}
                 style={{ background: 'rgba(10,147,150,0.08)' }}
               >
-                <p className="text-xs font-semibold text-[var(--color-secondary)] mb-1">⚡ Productive</p>
+                <p className="text-xs font-semibold text-[var(--color-secondary)] mb-1">⚡ Productief</p>
                 <p className="text-xl font-bold text-[var(--color-text)] font-mono">{formatSeconds(productiveSecs)}</p>
               </div>
               <div
                 className={`rounded-lg p-3 transition-all ${timerMode === 'non_productive' && timerRunning ? 'ring-2 ring-[var(--color-warning)]' : ''}`}
                 style={{ background: 'rgba(214,158,46,0.08)' }}
               >
-                <p className="text-xs font-semibold" style={{ color: 'var(--color-warning)' }}>⏸ Non-productive</p>
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-warning)' }}>⏸ Niet-productief</p>
                 <p className="text-xl font-bold text-[var(--color-text)] font-mono">{formatSeconds(nonProductiveSecs)}</p>
               </div>
             </div>
@@ -264,7 +264,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
                   style={{ background: 'var(--color-secondary)' }}
                 >
-                  <Play className="w-4 h-4" /> Start
+                  <Play className="w-4 h-4" /> Starten
                 </button>
               ) : (
                 <>
@@ -275,7 +275,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                     style={{ background: timerMode === 'productive' ? 'var(--color-secondary)' : 'var(--color-warning)' }}
                   >
                     {timerMode === 'productive' ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                    {timerMode === 'productive' ? 'Productive' : 'Non-productive'}
+                    {timerMode === 'productive' ? 'Productief' : 'Niet-productief'}
                   </button>
                   <button
                     type="button"
@@ -283,7 +283,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                     className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
                     style={{ border: '2px solid var(--color-border)', color: 'var(--color-text-muted)' }}
                   >
-                    <Pause className="w-4 h-4" /> Stop & Use
+                    <Pause className="w-4 h-4" /> Stop & Gebruiken
                   </button>
                 </>
               )}
@@ -296,7 +296,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
               htmlFor="duration"
               className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5"
             >
-              Duration (minutes)
+              Duur (minuten)
             </label>
             {/* Quick add buttons */}
             <div className="flex gap-1.5 mb-2.5">
@@ -306,7 +306,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                   type="button"
                   onClick={() => addMinutes(m)}
                   className="quick-time-btn"
-                  aria-label={`Add ${m} minutes`}
+                  aria-label={`Voeg ${m} minuten toe`}
                 >
                   +{m}
                 </button>
@@ -321,7 +321,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                 min="1"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="Enter minutes"
+                placeholder="Voer minuten in"
                 className="input pl-10"
                 required
               />
@@ -334,13 +334,13 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
               htmlFor="notes"
               className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5"
             >
-              Notes <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+              Notities <span className="normal-case font-normal text-[var(--color-text-light)]">(optioneel)</span>
             </label>
             <textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any observations or notes..."
+              placeholder="Eventuele opmerkingen of notities..."
               rows={3}
               className="input resize-none"
             />
@@ -360,11 +360,11 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
               className="btn btn-primary w-full text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <span>Saving…</span>
+                <span>Opslaan…</span>
               ) : (
                 <>
                   <ClipboardList className="w-5 h-5" />
-                  Save Task
+                  Taak Opslaan
                 </>
               )}
             </button>
