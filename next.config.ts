@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   // Strict mode for better error detection
   reactStrictMode: true,
   
+  // Request body size limit
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  
   // Security headers (additional to middleware)
   async headers() {
     return [

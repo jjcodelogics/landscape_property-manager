@@ -50,5 +50,7 @@ export const env = {
 // Validate on module load
 if (typeof window === 'undefined') {
   // Server-side validation only
-  console.log('✓ Environment variables validated successfully');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('✓ Environment variables validated successfully');
+  }
 }

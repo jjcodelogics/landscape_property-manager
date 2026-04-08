@@ -167,6 +167,13 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
     throw new Error(`${fieldName} must be a valid GeoJSON object`);
   }
   
+  // Size check first to prevent DoS before intensive processing
+  const jsonString = JSON.stringify(input);
+  const maxSize = 1024 * 1024; // 1MB
+  if (jsonString.length > maxSize) {
+    throw new Error(`${fieldName} is too large (max 1MB)`);
+  }
+  
   const geojson = input as any;
   
   // Basic GeoJSON validation
@@ -222,14 +229,6 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
     if (!Array.isArray(geojson.features)) {
       throw new Error(`${fieldName} FeatureCollection must have a features array`);
     }
-  }
-  
-  // Size check to prevent DoS
-  const jsonString = JSON.stringify(geojson);
-  const maxSize = 1024 * 1024; // 1MB
-  
-  if (jsonString.length > maxSize) {
-    throw new Error(`${fieldName} is too large (max 1MB)`);
   }
   
   return geojson as GeoJSON;

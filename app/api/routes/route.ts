@@ -12,9 +12,15 @@ interface CreateRouteRequest {
   point_ids?: string[];
 }
 
-function validateUUIDs(ids: unknown): string[] {
-  if (!Array.isArray(ids)) return [];
-  return ids.map((id: unknown, i: number) => validateUUID(id, `point_ids[${i}]`));
+function validateUUIDs(ids: unknown, fieldName: string = 'point_ids'): string[] {
+  if (!ids) return [];
+  if (!Array.isArray(ids)) {
+    throw new Error(`${fieldName} must be an array`);
+  }
+  if (ids.length > 100) {
+    throw new Error(`${fieldName} array too large (max 100 items)`);
+  }
+  return ids.map((id: unknown, i: number) => validateUUID(id, `${fieldName}[${i}]`));
 }
 
 export async function GET(request: NextRequest) {
