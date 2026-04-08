@@ -69,26 +69,17 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
       });
       map.addControl(drawControl);
 
-      // Type for draw created event
-      interface DrawCreatedEvent {
-        layer: L.Layer & { toGeoJSON: () => GeoJSON.Feature };
-        layerType: string;
-      }
-
-      map.on(L.Draw.Event.CREATED, (e: DrawCreatedEvent) => {
+      // Handle draw created event
+      map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.clearLayers();
-        const layer = e.layer;
+        const layer = e.layer as L.Layer & { toGeoJSON: () => GeoJSON.Feature };
         drawnItems.addLayer(layer);
         const geojson = layer.toGeoJSON() as GeoJSON.Feature;
         onPolygonDrawn(geojson);
       });
 
-      // Type for draw edited event
-      interface DrawEditedEvent {
-        layers: L.LayerGroup;
-      }
-
-      map.on(L.Draw.Event.EDITED, (e: DrawEditedEvent) => {
+      // Handle draw edited event
+      map.on(L.Draw.Event.EDITED, (e: any) => {
         const layers = e.layers;
         layers.eachLayer((layer: L.Layer) => {
           const geoJsonLayer = layer as L.Layer & { toGeoJSON: () => GeoJSON.Feature };

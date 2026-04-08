@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
  * Security middleware
  * Implements security headers, CORS, and request validation
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   
   // Security Headers
