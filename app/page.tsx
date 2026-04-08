@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic';
 import { useState, useCallback, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import TaskForm from '@/components/TaskForm';
+import ZoneInstructionsGenerator from '@/components/ZoneInstructionsGenerator';
 import { Zone } from '@/lib/types';
-import { BarChart2, Settings, Leaf } from 'lucide-react';
+import { BarChart2, Settings, Leaf, CalendarDays, Route, TrendingUp, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
@@ -21,6 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
 
   const loadZones = useCallback(async () => {
     try {
@@ -92,10 +94,47 @@ export default function Home() {
           </span>
         </div>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1.5">
+          <button
+            onClick={() => setShowInstructions(true)}
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            style={{ background: 'rgba(255,255,255,0.12)' }}
+            aria-label="Zone instructions"
+            title="Zone Instructions Generator"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Instructions</span>
+          </button>
+          <Link
+            href="/plan"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            style={{ background: 'rgba(255,255,255,0.12)' }}
+            aria-label="Daily plan"
+          >
+            <CalendarDays className="w-4 h-4" />
+            <span className="hidden sm:inline">Plan</span>
+          </Link>
+          <Link
+            href="/routes"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            style={{ background: 'rgba(255,255,255,0.12)' }}
+            aria-label="Points and routes"
+          >
+            <Route className="w-4 h-4" />
+            <span className="hidden lg:inline">Routes</span>
+          </Link>
+          <Link
+            href="/kpi"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            style={{ background: 'rgba(255,255,255,0.12)' }}
+            aria-label="KPI analytics"
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span className="hidden lg:inline">KPI</span>
+          </Link>
           <Link
             href="/stats"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="View statistics"
           >
@@ -104,7 +143,7 @@ export default function Home() {
           </Link>
           <Link
             href="/admin/zones"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="Admin panel"
           >
@@ -150,6 +189,14 @@ export default function Home() {
           zone={selectedZone}
           onClose={() => setShowTaskForm(false)}
           onSuccess={handleTaskSuccess}
+        />
+      )}
+
+      {/* ── Zone Instructions Generator ── */}
+      {showInstructions && (
+        <ZoneInstructionsGenerator
+          zones={zones}
+          onClose={() => setShowInstructions(false)}
         />
       )}
 

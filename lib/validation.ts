@@ -285,6 +285,65 @@ export function validateTaskType(input: unknown): TaskType {
 }
 
 /**
+ * Validate weather condition
+ */
+export const WEATHER_CONDITIONS = ['good', 'normal', 'bad'] as const;
+export type WeatherCondition = typeof WEATHER_CONDITIONS[number];
+
+export function validateWeatherCondition(input: unknown): WeatherCondition {
+  return validateEnum(input, 'Weather condition', WEATHER_CONDITIONS);
+}
+
+/**
+ * Validate difficulty level
+ */
+export const DIFFICULTY_LEVELS = ['normal', 'dirty', 'heavy'] as const;
+export type DifficultyLevel = typeof DIFFICULTY_LEVELS[number];
+
+export function validateDifficulty(input: unknown): DifficultyLevel {
+  return validateEnum(input, 'Difficulty', DIFFICULTY_LEVELS);
+}
+
+/**
+ * Validate task mode
+ */
+export const TASK_MODES = ['productive', 'non_productive'] as const;
+export type TaskMode = typeof TASK_MODES[number];
+
+export function validateTaskMode(input: unknown): TaskMode {
+  return validateEnum(input, 'Mode', TASK_MODES);
+}
+
+/**
+ * Validate tags array
+ */
+export function validateTags(input: unknown): string[] {
+  if (input === null || input === undefined) return [];
+  if (!Array.isArray(input)) {
+    throw new Error('Tags must be an array');
+  }
+  if (input.length > 20) {
+    throw new Error('Maximum 20 tags allowed');
+  }
+  return input.map((tag: unknown, i: number) => {
+    if (typeof tag !== 'string') throw new Error(`Tag at index ${i} must be a string`);
+    const sanitized = sanitizeString(tag, 50).toLowerCase().replace(/[^a-z0-9-_]/g, '');
+    if (!sanitized) throw new Error(`Tag at index ${i} is invalid`);
+    return sanitized;
+  });
+}
+
+/**
+ * Validate point type
+ */
+export const POINT_TYPES = ['trash_bin', 'asset', 'other'] as const;
+export type PointType = typeof POINT_TYPES[number];
+
+export function validatePointType(input: unknown): PointType {
+  return validateEnum(input, 'Point type', POINT_TYPES);
+}
+
+/**
  * Sanitize error message to prevent information leakage
  */
 export function sanitizeErrorMessage(error: unknown): string {

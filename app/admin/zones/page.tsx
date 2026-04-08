@@ -8,21 +8,27 @@ import { Zone, ZoneType } from '@/lib/types';
 
 const AdminMap = dynamic(() => import('@/components/AdminMap'), { ssr: false });
 
-const INSTRUCTIONS_PLACEHOLDER = `## Tasks
-- Task 1
+const INSTRUCTIONS_TEMPLATE = `## Tasks
 
 ## Notes
-- Note 1
+
+## Key Info
+- Units (m²): 
+- Access: 
 
 ## Contact
-**Name:** 
-**Phone:** `;
+- Facility Manager: 
+- Phone: 
+
+## Quality Standards
+`;
 
 interface ZoneFormData {
   title: string;
   name: string;
   type: ZoneType;
   instructions: string;
+  tags: string[];
   last_worked_at: string;
   next_scheduled_work: string;
 }
@@ -44,9 +50,11 @@ export default function AdminZonesPage() {
     name: '',
     type: 'grass',
     instructions: '',
+    tags: [],
     last_worked_at: '',
     next_scheduled_work: '',
   });
+  const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -76,10 +84,12 @@ export default function AdminZonesPage() {
       title: '', 
       name: '', 
       type: 'grass', 
-      instructions: '',
+      instructions: INSTRUCTIONS_TEMPLATE,
+      tags: [],
       last_worked_at: '',
       next_scheduled_work: '',
     });
+    setTagInput('');
   };
 
   const handleEditZone = (zone: Zone) => {
@@ -90,9 +100,11 @@ export default function AdminZonesPage() {
       name: zone.name || '',
       type: zone.type,
       instructions: zone.instructions || '',
+      tags: zone.tags || [],
       last_worked_at: zone.last_worked_at ? zone.last_worked_at.slice(0, 16) : '',
       next_scheduled_work: zone.next_scheduled_work ? zone.next_scheduled_work.slice(0, 16) : '',
     });
+    setTagInput('');
     setShowForm(true);
   };
 
@@ -271,9 +283,62 @@ export default function AdminZonesPage() {
                     value={formData.instructions}
                     onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, instructions: e.target.value }))}
                     className="input resize-none"
-                    placeholder={INSTRUCTIONS_PLACEHOLDER}
+                    placeholder={INSTRUCTIONS_TEMPLATE}
                     rows={5}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Tags <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                          e.preventDefault();
+                          const tag = tagInput.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+                          if (tag && !formData.tags.includes(tag)) {
+                            setFormData((p: ZoneFormData) => ({ ...p, tags: [...p.tags, tag] }));
+                          }
+                          setTagInput('');
+                        }
+                      }}
+                      className="input flex-1"
+                      placeholder="Add tag, press Enter"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tag = tagInput.trim().toLowerCase().replace(/[^a-z0-9-_]/g, '');
+                        if (tag && !formData.tags.includes(tag)) {
+                          setFormData((p: ZoneFormData) => ({ ...p, tags: [...p.tags, tag] }));
+                        }
+                        setTagInput('');
+                      }}
+                      className="btn btn-ghost text-sm px-3"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {formData.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {formData.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium cursor-pointer"
+                          style={{ background: 'rgba(10,147,150,0.12)', color: 'var(--color-secondary)' }}
+                          onClick={() => setFormData((p: ZoneFormData) => ({ ...p, tags: p.tags.filter((t) => t !== tag) }))}
+                          title="Click to remove"
+                        >
+                          #{tag} ×
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -317,7 +382,7 @@ export default function AdminZonesPage() {
                     {saving ? 'Saving…' : editingZone ? 'Update Zone' : 'Save Zone'}
                   </button>
                   <button
-                    onClick={() => { setShowForm(false); setDrawnGeojson(null); setEditingZone(null); }}
+                    onClick={() => { setShowForm(false); setDrawnGeojson(null); setEditingZone(null); setTagInput(''); }}
                     className="btn btn-ghost"
                   >
                     Cancel
@@ -371,6 +436,11 @@ export default function AdminZonesPage() {
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
                             {zone.type}
                           </span>
+                          {zone.area_m2 != null && zone.area_m2 > 0 && (
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              📐 {zone.area_m2.toLocaleString()} m²
+                            </span>
+                          )}
                           {lastWorked && (
                             <span className="text-xs text-[var(--color-text-muted)]">
                               Last: {lastWorked}
@@ -382,6 +452,15 @@ export default function AdminZonesPage() {
                             </span>
                           )}
                         </div>
+                        {zone.tags && zone.tags.length > 0 && (
+                          <div className="flex gap-1 mt-1.5 flex-wrap">
+                            {zone.tags.map((tag) => (
+                              <span key={tag} className="px-1.5 py-0.5 rounded text-xs" style={{ background: 'rgba(10,147,150,0.1)', color: 'var(--color-secondary)' }}>
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 ml-3">
                         <button

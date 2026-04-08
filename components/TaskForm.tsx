@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Zone, TaskType } from '@/lib/types';
-import { X, Scissors, Trash2, Wrench, Clock, ClipboardList } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Zone, TaskType, WeatherCondition, DifficultyLevel } from '@/lib/types';
+import { X, Scissors, Trash2, Wrench, Clock, ClipboardList, Play, Pause, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface TaskFormProps {
   zone: Zone;
@@ -16,17 +16,63 @@ const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = 
   { value: 'maintenance', label: 'Maintenance',  icon: <Wrench   className="w-4 h-4" /> },
 ];
 
+const WEATHER_OPTIONS: { value: WeatherCondition; label: string; emoji: string }[] = [
+  { value: 'good',   label: 'Good',   emoji: '☀️' },
+  { value: 'normal', label: 'Normal', emoji: '🌤️' },
+  { value: 'bad',    label: 'Bad',    emoji: '🌧️' },
+];
+
+const DIFFICULTY_OPTIONS: { value: DifficultyLevel; label: string; emoji: string }[] = [
+  { value: 'normal', label: 'Normal', emoji: '🟢' },
+  { value: 'dirty',  label: 'Dirty',  emoji: '🟡' },
+  { value: 'heavy',  label: 'Heavy',  emoji: '🔴' },
+];
+
 const QUICK_MINUTES = [5, 10, 15, 30, 45, 60];
+
+function formatSeconds(secs: number): string {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
 export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
   const [taskType, setTaskType] = useState<TaskType>('mowing');
   const [duration, setDuration] = useState('');
   const [notes, setNotes] = useState('');
+  const [weather, setWeather] = useState<WeatherCondition | null>(null);
+  const [difficulty, setDifficulty] = useState<DifficultyLevel | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleTaskTypeChange = (type: TaskType) => {
-    setTaskType(type);
+  // Chess clock state
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerMode, setTimerMode] = useState<'productive' | 'non_productive'>('productive');
+  const [productiveSecs, setProductiveSecs] = useState(0);
+  const [nonProductiveSecs, setNonProductiveSecs] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (timerRunning) {
+      intervalRef.current = setInterval(() => {
+        if (timerMode === 'productive') {
+          setProductiveSecs((s) => s + 1);
+        } else {
+          setNonProductiveSecs((s) => s + 1);
+        }
+      }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [timerRunning, timerMode]);
+
+  const handleStopTimer = () => {
+    setTimerRunning(false);
+    const totalMins = Math.ceil((productiveSecs + nonProductiveSecs) / 60);
+    if (totalMins > 0) setDuration(String(totalMins));
   };
 
   const addMinutes = (mins: number) => {
@@ -46,6 +92,12 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
 
     setLoading(true);
     try {
+      const productive_minutes = Math.floor(productiveSecs / 60);
+      const non_productive_minutes = Math.floor(nonProductiveSecs / 60);
+      const mode = (productive_minutes > 0 || non_productive_minutes > 0)
+        ? (productive_minutes >= non_productive_minutes ? 'productive' : 'non_productive')
+        : null;
+
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,6 +106,11 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
           task_type: taskType,
           duration_minutes: durationNum,
           notes: notes.trim() || null,
+          weather_condition: weather,
+          difficulty,
+          mode,
+          productive_minutes,
+          non_productive_minutes,
         }),
       });
 
@@ -112,7 +169,7 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                   <button
                     key={type.value}
                     type="button"
-                    onClick={() => handleTaskTypeChange(type.value)}
+                    onClick={() => setTaskType(type.value)}
                     className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-sm font-semibold transition-all active:scale-95 touch-manipulation min-h-[64px] border-2 ${
                       active
                         ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white shadow-md'
@@ -124,6 +181,112 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Weather */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
+              Weather <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {WEATHER_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setWeather(weather === opt.value ? null : opt.value)}
+                  className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-sm font-semibold transition-all active:scale-95 touch-manipulation border-2 ${
+                    weather === opt.value
+                      ? 'bg-[var(--color-secondary)] border-[var(--color-secondary)] text-white'
+                      : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)]'
+                  }`}
+                >
+                  <span className="text-base">{opt.emoji}</span>
+                  <span className="text-xs">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Difficulty */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2.5">
+              Difficulty <span className="normal-case font-normal text-[var(--color-text-light)]">(optional)</span>
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {DIFFICULTY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setDifficulty(difficulty === opt.value ? null : opt.value)}
+                  className={`flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl text-sm font-semibold transition-all active:scale-95 touch-manipulation border-2 ${
+                    difficulty === opt.value
+                      ? 'bg-[var(--color-secondary)] border-[var(--color-secondary)] text-white'
+                      : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)]'
+                  }`}
+                >
+                  <span className="text-base">{opt.emoji}</span>
+                  <span className="text-xs">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chess clock */}
+          <div
+            className="rounded-xl p-4 space-y-3"
+            style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
+          >
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)]">
+              Timer (optional)
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div
+                className={`rounded-lg p-3 transition-all ${timerMode === 'productive' && timerRunning ? 'ring-2 ring-[var(--color-secondary)]' : ''}`}
+                style={{ background: 'rgba(10,147,150,0.08)' }}
+              >
+                <p className="text-xs font-semibold text-[var(--color-secondary)] mb-1">⚡ Productive</p>
+                <p className="text-xl font-bold text-[var(--color-text)] font-mono">{formatSeconds(productiveSecs)}</p>
+              </div>
+              <div
+                className={`rounded-lg p-3 transition-all ${timerMode === 'non_productive' && timerRunning ? 'ring-2 ring-[var(--color-warning)]' : ''}`}
+                style={{ background: 'rgba(214,158,46,0.08)' }}
+              >
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-warning)' }}>⏸ Non-productive</p>
+                <p className="text-xl font-bold text-[var(--color-text)] font-mono">{formatSeconds(nonProductiveSecs)}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {!timerRunning ? (
+                <button
+                  type="button"
+                  onClick={() => setTimerRunning(true)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+                  style={{ background: 'var(--color-secondary)' }}
+                >
+                  <Play className="w-4 h-4" /> Start
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setTimerMode(timerMode === 'productive' ? 'non_productive' : 'productive')}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold text-white transition-all"
+                    style={{ background: timerMode === 'productive' ? 'var(--color-secondary)' : 'var(--color-warning)' }}
+                  >
+                    {timerMode === 'productive' ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                    {timerMode === 'productive' ? 'Productive' : 'Non-productive'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleStopTimer}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all"
+                    style={{ border: '2px solid var(--color-border)', color: 'var(--color-text-muted)' }}
+                  >
+                    <Pause className="w-4 h-4" /> Stop & Use
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { GeoJSON } from 'geojson';
 import { supabase } from '@/lib/supabase';
 import {
   validateText,
@@ -6,9 +7,11 @@ import {
   validateZoneType,
   validateUUID,
   validateISODate,
+  validateTags,
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+import { calculatePolygonArea } from '@/lib/geo';
 
 interface UpdateZoneRequest {
   title: string;
@@ -16,6 +19,7 @@ interface UpdateZoneRequest {
   type: string;
   instructions?: string;
   geojson: unknown;
+  tags?: unknown;
   last_worked_at?: string;
   next_scheduled_work?: string;
 }
@@ -71,13 +75,15 @@ export async function PUT(
       maxLength: 2000,
     }) || null;
     const geojson = validateGeoJSON(body.geojson, 'GeoJSON');
+    const area_m2 = Math.round(calculatePolygonArea(geojson as GeoJSON.Feature));
+    const tags = validateTags(body.tags ?? []);
     const last_worked_at = validateISODate(body.last_worked_at, 'Last worked at', { required: false });
     const next_scheduled_work = validateISODate(body.next_scheduled_work, 'Next scheduled work', { required: false });
 
     // Update database
     const { data, error } = await supabase
       .from('zones')
-      .update({ title, name, type, instructions, geojson, last_worked_at, next_scheduled_work })
+      .update({ title, name, type, instructions, geojson, area_m2, tags, last_worked_at, next_scheduled_work })
       .eq('id', validatedId)
       .select()
       .single();
