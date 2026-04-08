@@ -20,7 +20,7 @@ function validateUrl(url: string, varName: string): string {
   try {
     new URL(url);
     return url;
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid URL format for ${varName}: ${url}`);
   }
 }

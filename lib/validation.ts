@@ -174,10 +174,10 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
     throw new Error(`${fieldName} is too large (max 1MB)`);
   }
   
-  const geojson = input as any;
+  const geojson = input as Record<string, unknown>;
   
   // Basic GeoJSON validation
-  if (!geojson.type) {
+  if (!geojson.type || typeof geojson.type !== 'string') {
     throw new Error(`${fieldName} must have a 'type' property`);
   }
   
@@ -214,13 +214,14 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
   
   // Validate Feature
   if (geojson.type === 'Feature') {
-    if (!geojson.geometry) {
+    if (!geojson.geometry || typeof geojson.geometry !== 'object') {
       throw new Error(`${fieldName} Feature must have a geometry property`);
     }
     
     // Recursively validate the geometry
-    if (geojson.geometry.coordinates) {
-      validateCoordinateBounds(geojson.geometry.coordinates, fieldName);
+    const geometry = geojson.geometry as Record<string, unknown>;
+    if (geometry.coordinates) {
+      validateCoordinateBounds(geometry.coordinates, fieldName);
     }
   }
   
@@ -231,13 +232,15 @@ export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {
     }
   }
   
-  return geojson as GeoJSON;
+  return geojson as unknown as GeoJSON;
 }
 
 /**
  * Validate coordinate bounds (recursive)
  */
-function validateCoordinateBounds(coords: any, fieldName: string): void {
+function validateCoordinateBounds(coords: unknown, fieldName: string): void {
+  if (!Array.isArray(coords)) return;
+  
   if (typeof coords[0] === 'number') {
     // This is a single coordinate pair [lon, lat]
     const [lon, lat] = coords;

@@ -46,12 +46,11 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
 
     import('leaflet-draw').then(() => {
       // Check if map is still mounted and initialized
-      if (!mapRef.current || !(map as any)._loaded) return;
+      if (!mapRef.current || !map.getContainer()) return;
 
-      // Type for Leaflet Draw control
-      const LDrawControl = (L.Control as any).Draw;
-      
-      const drawControl = new LDrawControl({
+      // Add Leaflet Draw control
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const drawControl = new (L.Control as any).Draw({
         edit: {
           featureGroup: drawnItems,
         },
@@ -70,6 +69,7 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
       map.addControl(drawControl);
 
       // Handle draw created event
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.on(L.Draw.Event.CREATED, (e: any) => {
         drawnItems.clearLayers();
         const layer = e.layer as L.Layer & { toGeoJSON: () => GeoJSON.Feature };
@@ -79,6 +79,7 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson }: Admi
       });
 
       // Handle draw edited event
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       map.on(L.Draw.Event.EDITED, (e: any) => {
         const layers = e.layers;
         layers.eachLayer((layer: L.Layer) => {

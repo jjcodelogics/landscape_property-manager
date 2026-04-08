@@ -32,16 +32,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error: dbError } = await supabase
       .from('tasks')
       .select('*, zones(name, type)')
       .order('created_at', { ascending: false })
       .limit(50);
 
-    if (error) {
-      console.error('Database error:', error);
+    if (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: sanitizeErrorMessage(error) },
+        { error: sanitizeErrorMessage(dbError) },
         { 
           status: 500,
           headers: getRateLimitHeaders(rateLimitResult),
@@ -52,10 +52,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data, {
       headers: getRateLimitHeaders(rateLimitResult),
     });
-  } catch (error) {
-    console.error('Unexpected error:', error);
+  } catch (err) {
+    console.error('Unexpected error:', err);
     return NextResponse.json(
-      { error: sanitizeErrorMessage(error) },
+      { error: sanitizeErrorMessage(err) },
       { 
         status: 500,
         headers: getRateLimitHeaders(rateLimitResult),
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     let body: CreateTaskRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
         { 
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       : 0;
 
     // Insert into database
-    const { data, error } = await supabase
+    const { data, error: dbError } = await supabase
       .from('tasks')
       .insert([{
         zone_id, task_type, duration_minutes, notes,
@@ -139,10 +139,10 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (error) {
-      console.error('Database error:', error);
+    if (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: sanitizeErrorMessage(error) },
+        { error: sanitizeErrorMessage(dbError) },
         { 
           status: 500,
           headers: getRateLimitHeaders(rateLimitResult),
@@ -154,12 +154,12 @@ export async function POST(request: NextRequest) {
       status: 201,
       headers: getRateLimitHeaders(rateLimitResult),
     });
-  } catch (error) {
-    console.error('Validation or unexpected error:', error);
+  } catch (err) {
+    console.error('Validation or unexpected error:', err);
     return NextResponse.json(
-      { error: sanitizeErrorMessage(error) },
+      { error: sanitizeErrorMessage(err) },
       { 
-        status: error instanceof Error && error.message.includes('must') ? 400 : 500,
+        status: err instanceof Error && err.message.includes('must') ? 400 : 500,
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );

@@ -87,7 +87,10 @@ function getClientIP(request: Request): string {
   // Vercel/Cloudflare/proxy headers
   const forwardedFor = headers.get('x-forwarded-for');
   if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
+    const firstIP = forwardedFor.split(',')[0];
+    if (firstIP) {
+      return firstIP.trim();
+    }
   }
   
   const realIP = headers.get('x-real-ip');

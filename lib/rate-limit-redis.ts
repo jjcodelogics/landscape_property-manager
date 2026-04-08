@@ -21,9 +21,23 @@
 
 import { env } from './env';
 
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+interface RedisClient {
+  pipeline: () => RedisPipeline;
+}
+
+interface RedisPipeline {
+  zremrangebyscore: (key: string, min: number, max: number) => RedisPipeline;
+  zcard: (key: string) => RedisPipeline;
+  zadd: (key: string, options: { score: number; member: string }) => RedisPipeline;
+  expire: (key: string, seconds: number) => RedisPipeline;
+  exec: () => Promise<unknown[]>;
+}
+
 // ─── Redis Client (Dynamic Import) ──────────────────────────────────────────
 
-let redisClient: any = null;
+let redisClient: RedisClient | null = null;
 let redisAvailable = false;
 
 // Try to initialize Redis client
@@ -41,6 +55,7 @@ async function initRedis() {
   
   try {
     // Dynamic import to avoid errors if @upstash/redis is not installed
+    // @ts-expect-error - Optional dependency, may not be installed
     const { Redis } = await import('@upstash/redis');
     redisClient = new Redis({
       url: redisUrl,
@@ -50,7 +65,7 @@ async function initRedis() {
     if (env.isDevelopment) {
       console.log('✓ Redis rate limiting enabled');
     }
-  } catch (error) {
+  } catch {
     console.warn('⚠️ @upstash/redis not installed. Run: npm install @upstash/redis');
     console.warn('⚠️ Falling back to in-memory rate limiting');
     redisAvailable = false;
@@ -105,7 +120,10 @@ function getClientIP(request: Request): string {
   
   const forwardedFor = headers.get('x-forwarded-for');
   if (forwardedFor) {
-    return forwardedFor.split(',')[0].trim();
+    const firstIP = forwardedFor.split(',')[0];
+    if (firstIP) {
+      return firstIP.trim();
+    }
   }
   
   const realIP = headers.get('x-real-ip');
@@ -123,6 +141,11 @@ async function checkRateLimitRedis(
   maxRequests: number,
   windowMs: number
 ): Promise<RateLimitResult> {
+  // Should not happen as this is only called when redisClient is available
+  if (!redisClient) {
+    throw new Error('Redis client not initialized');
+  }
+  
   const now = Date.now();
   const windowStart = now - windowMs;
   const resetTime = now + windowMs;

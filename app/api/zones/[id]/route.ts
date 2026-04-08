@@ -56,7 +56,7 @@ export async function PUT(
     let body: UpdateZoneRequest;
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
         { 
@@ -81,17 +81,17 @@ export async function PUT(
     const next_scheduled_work = validateISODate(body.next_scheduled_work, 'Next scheduled work', { required: false });
 
     // Update database
-    const { data, error } = await supabase
+    const { data, error: dbError } = await supabase
       .from('zones')
       .update({ title, name, type, instructions, geojson, area_m2, tags, last_worked_at, next_scheduled_work })
       .eq('id', validatedId)
       .select()
       .single();
 
-    if (error) {
-      console.error('Database error:', error);
+    if (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: sanitizeErrorMessage(error) },
+        { error: sanitizeErrorMessage(dbError) },
         { 
           status: 500,
           headers: getRateLimitHeaders(rateLimitResult),
@@ -112,12 +112,12 @@ export async function PUT(
     return NextResponse.json(data, {
       headers: getRateLimitHeaders(rateLimitResult),
     });
-  } catch (error) {
-    console.error('Validation or unexpected error:', error);
+  } catch (err) {
+    console.error('Validation or unexpected error:', err);
     return NextResponse.json(
-      { error: sanitizeErrorMessage(error) },
+      { error: sanitizeErrorMessage(err) },
       { 
-        status: error instanceof Error && error.message.includes('must') ? 400 : 500,
+        status: err instanceof Error && err.message.includes('must') ? 400 : 500,
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );
@@ -141,15 +141,15 @@ export async function DELETE(
     const validatedId = validateUUID(id, 'Zone ID');
 
     // Delete from database
-    const { error } = await supabase
+    const { error: dbError } = await supabase
       .from('zones')
       .delete()
       .eq('id', validatedId);
 
-    if (error) {
-      console.error('Database error:', error);
+    if (dbError) {
+      console.error('Database error:', dbError);
       return NextResponse.json(
-        { error: sanitizeErrorMessage(error) },
+        { error: sanitizeErrorMessage(dbError) },
         { 
           status: 500,
           headers: getRateLimitHeaders(rateLimitResult),
@@ -163,12 +163,12 @@ export async function DELETE(
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );
-  } catch (error) {
-    console.error('Validation or unexpected error:', error);
+  } catch (err) {
+    console.error('Validation or unexpected error:', err);
     return NextResponse.json(
-      { error: sanitizeErrorMessage(error) },
+      { error: sanitizeErrorMessage(err) },
       { 
-        status: error instanceof Error && error.message.includes('must') ? 400 : 500,
+        status: err instanceof Error && err.message.includes('must') ? 400 : 500,
         headers: getRateLimitHeaders(rateLimitResult),
       }
     );
