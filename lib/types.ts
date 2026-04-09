@@ -95,3 +95,25 @@ export interface DaySessionSummary {
   total_non_productive_minutes: number;
   active_session: DaySession | null;
 }
+
+export interface PlannedTask {
+  id: string;
+  date: string;
+  zone_id: string;
+  estimated_minutes: number;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface PlannedTaskWithZone extends PlannedTask {
+  zones?: Pick<Zone, 'id' | 'title' | 'name' | 'type'>;
+}
+
+export interface DayConfig {
+  id: string;
+  date: string;
+  team_members: number;
+  hours_per_member: number;
+  created_at: string;
+  updated_at: string;
+}

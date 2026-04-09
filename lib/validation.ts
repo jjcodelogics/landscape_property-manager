@@ -160,6 +160,29 @@ export function validateISODate(
 }
 
 /**
+ * Validate date string in YYYY-MM-DD format
+ */
+export function validateDate(
+  input: unknown
+): { valid: boolean; error?: string } {
+  if (typeof input !== 'string') {
+    return { valid: false, error: 'Date must be a string' };
+  }
+  
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(input)) {
+    return { valid: false, error: 'Date must be in YYYY-MM-DD format' };
+  }
+  
+  const date = new Date(input);
+  if (isNaN(date.getTime())) {
+    return { valid: false, error: 'Invalid date' };
+  }
+  
+  return { valid: true };
+}
+
+/**
  * Validate GeoJSON object
  */
 export function validateGeoJSON(input: unknown, fieldName: string): GeoJSON {

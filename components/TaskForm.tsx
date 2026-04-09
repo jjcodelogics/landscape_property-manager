@@ -80,6 +80,14 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
     setDuration(String(current + mins));
   };
 
+  const resetTimer = () => {
+    setTimerRunning(false);
+    setTimerMode('productive');
+    setProductiveSecs(0);
+    setNonProductiveSecs(0);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -119,6 +127,13 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
         throw new Error(data.error || 'Failed to log task');
       }
 
+      // Reset timer state after successful submission
+      resetTimer();
+      setDuration('');
+      setNotes('');
+      setWeather(null);
+      setDifficulty(null);
+      
       onSuccess();
       onClose();
     } catch (err) {
@@ -148,7 +163,10 @@ export default function TaskForm({ zone, onClose, onSuccess }: TaskFormProps) {
             <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{zone.title}</p>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              resetTimer();
+              onClose();
+            }}
             className="p-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors touch-manipulation"
             aria-label="Sluiten"
           >
