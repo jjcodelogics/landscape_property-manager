@@ -38,10 +38,11 @@ export async function PUT(
     const { id } = await params;
 
     // Validate task ID
-    const taskIdValidation = validateUUID(id);
-    if (!taskIdValidation.valid) {
+    try {
+      validateUUID(id, 'task ID');
+    } catch (err) {
       return NextResponse.json(
-        { error: taskIdValidation.error },
+        { error: err instanceof Error ? err.message : 'Invalid task ID' },
         {
           status: 400,
           headers: getRateLimitHeaders(rateLimitResult),
@@ -79,48 +80,48 @@ export async function PUT(
     const updates: Record<string, unknown> = {};
 
     if (body.task_type !== undefined) {
-      const validation = validateTaskType(body.task_type);
-      if (!validation.valid) {
+      try {
+        updates.task_type = validateTaskType(body.task_type);
+      } catch (err) {
         return NextResponse.json(
-          { error: validation.error },
+          { error: err instanceof Error ? err.message : 'Invalid task type' },
           {
             status: 400,
             headers: getRateLimitHeaders(rateLimitResult),
           }
         );
       }
-      updates.task_type = body.task_type;
     }
 
     if (body.duration_minutes !== undefined) {
-      const validation = validatePositiveInteger(body.duration_minutes, 'duration_minutes');
-      if (!validation.valid) {
+      try {
+        updates.duration_minutes = validatePositiveInteger(body.duration_minutes, 'duration_minutes');
+      } catch (err) {
         return NextResponse.json(
-          { error: validation.error },
+          { error: err instanceof Error ? err.message : 'Invalid duration_minutes' },
           {
             status: 400,
             headers: getRateLimitHeaders(rateLimitResult),
           }
         );
       }
-      updates.duration_minutes = body.duration_minutes;
     }
 
     if (body.notes !== undefined) {
       if (body.notes === null || body.notes.trim() === '') {
         updates.notes = null;
       } else {
-        const validation = validateText(body.notes, 'notes', { maxLength: 500 });
-        if (!validation.valid) {
+        try {
+          updates.notes = validateText(body.notes, 'notes', { maxLength: 500 });
+        } catch (err) {
           return NextResponse.json(
-            { error: validation.error },
+            { error: err instanceof Error ? err.message : 'Invalid notes' },
             {
               status: 400,
               headers: getRateLimitHeaders(rateLimitResult),
             }
           );
         }
-        updates.notes = body.notes.trim();
       }
     }
 
@@ -128,17 +129,17 @@ export async function PUT(
       if (body.weather_condition === null) {
         updates.weather_condition = null;
       } else {
-        const validation = validateWeatherCondition(body.weather_condition);
-        if (!validation.valid) {
+        try {
+          updates.weather_condition = validateWeatherCondition(body.weather_condition);
+        } catch (err) {
           return NextResponse.json(
-            { error: validation.error },
+            { error: err instanceof Error ? err.message : 'Invalid weather_condition' },
             {
               status: 400,
               headers: getRateLimitHeaders(rateLimitResult),
             }
           );
         }
-        updates.weather_condition = body.weather_condition;
       }
     }
 
@@ -146,17 +147,17 @@ export async function PUT(
       if (body.difficulty === null) {
         updates.difficulty = null;
       } else {
-        const validation = validateDifficulty(body.difficulty);
-        if (!validation.valid) {
+        try {
+          updates.difficulty = validateDifficulty(body.difficulty);
+        } catch (err) {
           return NextResponse.json(
-            { error: validation.error },
+            { error: err instanceof Error ? err.message : 'Invalid difficulty' },
             {
               status: 400,
               headers: getRateLimitHeaders(rateLimitResult),
             }
           );
         }
-        updates.difficulty = body.difficulty;
       }
     }
 
@@ -164,17 +165,17 @@ export async function PUT(
       if (body.mode === null) {
         updates.mode = null;
       } else {
-        const validation = validateTaskMode(body.mode);
-        if (!validation.valid) {
+        try {
+          updates.mode = validateTaskMode(body.mode);
+        } catch (err) {
           return NextResponse.json(
-            { error: validation.error },
+            { error: err instanceof Error ? err.message : 'Invalid mode' },
             {
               status: 400,
               headers: getRateLimitHeaders(rateLimitResult),
             }
           );
         }
-        updates.mode = body.mode;
       }
     }
 
@@ -255,10 +256,11 @@ export async function DELETE(
     const { id } = await params;
 
     // Validate task ID
-    const taskIdValidation = validateUUID(id);
-    if (!taskIdValidation.valid) {
+    try {
+      validateUUID(id, 'task ID');
+    } catch (err) {
       return NextResponse.json(
-        { error: taskIdValidation.error },
+        { error: err instanceof Error ? err.message : 'Invalid task ID' },
         {
           status: 400,
           headers: getRateLimitHeaders(rateLimitResult),
