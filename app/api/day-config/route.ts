@@ -62,7 +62,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data || [], {
-      headers: getRateLimitHeaders(rateLimitResult),
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=120',
+      },
     });
   } catch (err) {
     logger.error('Unexpected error:', err);

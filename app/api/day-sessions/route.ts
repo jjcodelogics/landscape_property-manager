@@ -58,7 +58,10 @@ export async function GET(request: NextRequest) {
         active_session,
       },
     }, {
-      headers: getRateLimitHeaders(rateLimitResult),
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, no-cache',
+      },
     });
   } catch (err) {
     logger.error('Unexpected error:', err);
