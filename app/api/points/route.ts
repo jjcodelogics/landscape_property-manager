@@ -7,6 +7,7 @@ import {
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface CreatePointRequest {
   title: string;
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('points')
-      .select('*')
+      .select('id, title, type, notes, geojson, created_at')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -32,7 +33,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data, { headers: getRateLimitHeaders(rateLimitResult) });
+    return NextResponse.json(data, {
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) },

@@ -105,7 +105,7 @@ export default function WeekCalendarPage() {
       const data = await response.json();
       setPlannedTasks(data);
     } catch (err) {
-      console.error('Error fetching planned tasks:', err);
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching planned tasks:', err);
     }
   };
 
@@ -121,7 +121,7 @@ export default function WeekCalendarPage() {
       const data = await response.json();
       setDayConfigs(data);
     } catch (err) {
-      console.error('Error fetching day configs:', err);
+      if (process.env.NODE_ENV === 'development') console.error('Error fetching day configs:', err);
     }
   };
 
@@ -206,7 +206,7 @@ export default function WeekCalendarPage() {
 
       await fetchPlannedTasks();
     } catch (err) {
-      console.error('Error creating plan:', err);
+      if (process.env.NODE_ENV === 'development') console.error('Error creating plan:', err);
       alert(err instanceof Error ? err.message : 'Failed to create plan');
     }
   };
@@ -225,7 +225,7 @@ export default function WeekCalendarPage() {
 
       await fetchPlannedTasks();
     } catch (err) {
-      console.error('Error deleting planned task:', err);
+      if (process.env.NODE_ENV === 'development') console.error('Error deleting planned task:', err);
       alert('Failed to delete planned task');
     }
   };
@@ -249,7 +249,7 @@ export default function WeekCalendarPage() {
 
       await fetchDayConfigs();
     } catch (err) {
-      console.error('Error updating day config:', err);
+      if (process.env.NODE_ENV === 'development') console.error('Error updating day config:', err);
       alert(err instanceof Error ? err.message : 'Failed to update day config');
     }
   };

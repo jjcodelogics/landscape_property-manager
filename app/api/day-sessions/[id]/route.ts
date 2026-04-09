@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -25,7 +26,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { status: 500, headers: getRateLimitHeaders(rateLimitResult) }
@@ -36,7 +37,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { status: 500, headers: getRateLimitHeaders(rateLimitResult) }

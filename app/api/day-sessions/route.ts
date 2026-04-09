@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   const rateLimitResult = checkRateLimit(request);
@@ -16,12 +17,12 @@ export async function GET(request: NextRequest) {
     // Get all sessions for the specified date
     const { data: sessions, error: sessionsError } = await supabase
       .from('day_sessions')
-      .select('*')
+      .select('id, date, mode, start_time, end_time, non_productive_reason, created_at')
       .eq('date', date)
       .order('start_time', { ascending: true });
 
     if (sessionsError) {
-      console.error('Database error:', sessionsError);
+      logger.error('Database error:', sessionsError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(sessionsError) },
         { status: 500, headers: getRateLimitHeaders(rateLimitResult) }
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { status: 500, headers: getRateLimitHeaders(rateLimitResult) }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
     // Check for active session
     const { data: activeSession } = await supabase
       .from('day_sessions')
-      .select('*')
+      .select('id, date, mode, start_time, end_time, non_productive_reason, created_at')
       .eq('date', today)
       .is('end_time', null)
       .single();
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { status: 500, headers: getRateLimitHeaders(rateLimitResult) }
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Validation or unexpected error:', err);
+    logger.error('Validation or unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { status: 500, headers: getRateLimitHeaders(rateLimitResult) }

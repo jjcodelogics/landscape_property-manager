@@ -11,6 +11,7 @@ import {
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface CreateTaskRequest {
   zone_id: string;
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       .limit(50);
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -50,10 +51,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data, {
-      headers: getRateLimitHeaders(rateLimitResult),
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+      },
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 
@@ -140,7 +144,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -155,7 +159,7 @@ export async function POST(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Validation or unexpected error:', err);
+    logger.error('Validation or unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 

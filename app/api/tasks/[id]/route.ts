@@ -11,6 +11,7 @@ import {
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface UpdateTaskRequest {
   task_type?: string;
@@ -205,7 +206,7 @@ export async function PUT(
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         {
@@ -229,7 +230,7 @@ export async function PUT(
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       {
@@ -272,7 +273,7 @@ export async function DELETE(
       .eq('id', id);
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         {
@@ -289,7 +290,7 @@ export async function DELETE(
       }
     );
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       {

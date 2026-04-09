@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -56,10 +57,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data || [], {
-      headers: getRateLimitHeaders(rateLimitResult),
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=120',
+      },
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 

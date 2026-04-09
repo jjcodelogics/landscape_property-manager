@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage, validateUUID } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 interface RouteParams {
   params: Promise<{
@@ -29,7 +30,7 @@ export async function DELETE(
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Database error:', deleteError);
+      logger.error('Database error:', deleteError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(deleteError) },
         { 
@@ -46,7 +47,7 @@ export async function DELETE(
       }
     );
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 

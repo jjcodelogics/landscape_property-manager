@@ -7,6 +7,7 @@ import {
   sanitizeErrorMessage,
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 interface CreatePlanRequest {
   plan_date: string;
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('daily_plans')
-      .select('*')
+      .select('id, plan_date, zone_ids, team_members, hours_per_member, notes, created_at')
       .order('plan_date', { ascending: false });
 
     if (error) {
@@ -44,7 +45,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(data, { headers: getRateLimitHeaders(rateLimitResult) });
+    return NextResponse.json(data, {
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) },

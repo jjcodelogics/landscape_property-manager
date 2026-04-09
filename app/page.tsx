@@ -36,7 +36,7 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.error('Failed to load zones:', error);
+      if (process.env.NODE_ENV === 'development') console.error('Failed to load zones:', error);
     } finally {
       setLoading(false);
     }

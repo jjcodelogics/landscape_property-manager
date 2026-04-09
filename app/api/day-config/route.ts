@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage, validateDate, validatePositiveInteger } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 interface CreateDayConfigRequest {
   date: string;
@@ -44,13 +45,13 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError } = await supabase
       .from('day_config')
-      .select('*')
+      .select('id, date, team_members, hours_per_member, created_at, updated_at')
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: true });
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (upsertError) {
-      console.error('Database error:', upsertError);
+      logger.error('Database error:', upsertError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(upsertError) },
         { 
@@ -169,7 +170,7 @@ export async function POST(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 

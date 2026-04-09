@@ -12,6 +12,7 @@ import {
 } from '@/lib/validation';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { calculatePolygonArea } from '@/lib/geo';
+import { logger } from '@/lib/logger';
 
 interface UpdateZoneRequest {
   title: string;
@@ -89,7 +90,7 @@ export async function PUT(
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -113,7 +114,7 @@ export async function PUT(
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Validation or unexpected error:', err);
+    logger.error('Validation or unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 
@@ -147,7 +148,7 @@ export async function DELETE(
       .eq('id', validatedId);
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -164,7 +165,7 @@ export async function DELETE(
       }
     );
   } catch (err) {
-    console.error('Validation or unexpected error:', err);
+    logger.error('Validation or unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 

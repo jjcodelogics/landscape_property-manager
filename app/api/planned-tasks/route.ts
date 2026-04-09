@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { checkRateLimit, rateLimitExceeded, getRateLimitHeaders } from '@/lib/rate-limit';
 import { sanitizeErrorMessage, validateDate, validateUUID, validatePositiveInteger, validateText } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 interface CreatePlannedTaskRequest {
   date: string;
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
       .order('date', { ascending: true });
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      logger.error('Database error:', dbError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(dbError) },
         { 
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.error('Database error:', insertError);
+      logger.error('Database error:', insertError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(insertError) },
         { 
@@ -186,7 +187,7 @@ export async function POST(request: NextRequest) {
       headers: getRateLimitHeaders(rateLimitResult),
     });
   } catch (err) {
-    console.error('Unexpected error:', err);
+    logger.error('Unexpected error:', err);
     return NextResponse.json(
       { error: sanitizeErrorMessage(err) },
       { 
