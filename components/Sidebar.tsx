@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Zone } from '@/lib/types';
 import { X, ClipboardList, Edit3, Save, XCircle, Tag, Ruler } from 'lucide-react';
+import { getZoneStatusLabel, getZoneColorByLastWorked } from '@/lib/zone-colors';
 
 const ZONE_TYPE_LABELS: Record<string, string> = {
   grass:       'Grasonderhoud',
@@ -145,14 +146,32 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
               </div>
             )}
             {(zone.last_worked_at || zone.next_scheduled_work) && (
-              <div className="mt-2 text-xs space-y-0.5">
+              <div className="mt-2 text-xs space-y-1">
                 {zone.last_worked_at && (
-                  <p className="text-[var(--color-text-muted)]">
-                    Laatst bewerkt: {new Date(zone.last_worked_at).toLocaleDateString('nl-NL')}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ background: getZoneColorByLastWorked(zone.last_worked_at) }}
+                    />
+                    <p className="text-[var(--color-text-muted)]">
+                      Laatst bewerkt: <span className="font-semibold">{getZoneStatusLabel(zone.last_worked_at)}</span>
+                      {' '}({new Date(zone.last_worked_at).toLocaleDateString('nl-NL')})
+                    </p>
+                  </div>
+                )}
+                {!zone.last_worked_at && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      style={{ background: getZoneColorByLastWorked(null) }}
+                    />
+                    <p className="text-[var(--color-text-muted)]">
+                      Laatst bewerkt: <span className="font-semibold">{getZoneStatusLabel(null)}</span>
+                    </p>
+                  </div>
                 )}
                 {zone.next_scheduled_work && (
-                  <p className="text-[var(--color-secondary)] font-medium">
+                  <p className="text-[var(--color-secondary)] font-medium ml-4.5">
                     Volgend gepland: {new Date(zone.next_scheduled_work).toLocaleDateString('nl-NL')}
                   </p>
                 )}

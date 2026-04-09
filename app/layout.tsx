@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import DayTimer from '@/components/DayTimer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -19,7 +20,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#005f73" />
       </head>
       <body className="antialiased touch-manipulation">
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary>
+          {children}
+          <DayTimer />
+        </ErrorBoundary>
       </body>
     </html>
   );

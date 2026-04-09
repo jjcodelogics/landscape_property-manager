@@ -4,13 +4,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Zone } from '@/lib/types';
-
-// DonkerGroep zone palette
-const ZONE_COLORS: Record<string, string> = {
-  grass:       '#6aa84f',
-  waste:       '#3d85c6',
-  maintenance: '#e69138',
-};
+import { getZoneColorByLastWorked } from '@/lib/zone-colors';
 
 interface MapProps {
   zones: Zone[];
@@ -62,7 +56,7 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
     layersRef.current = {};
 
     zones.forEach((zone) => {
-      const color = ZONE_COLORS[zone.type] || '#6b7280';
+      const color = getZoneColorByLastWorked(zone.last_worked_at);
       const isSelected = zone.id === selectedZoneId;
 
       const layer = L.geoJSON(zone.geojson, {

@@ -3,8 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trash2, Edit3, MapPin, PenSquare } from 'lucide-react';
-import { Zone, ZoneType } from '@/lib/types';
+import { ArrowLeft, Trash2, Edit3, MapPin, PenSquare, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Zone, ZoneType, Point } from '@/lib/types';
 
 const AdminMap = dynamic(() => import('@/components/AdminMap'), { ssr: false });
 
@@ -39,7 +39,23 @@ const ZONE_TYPE_OPTIONS: { value: ZoneType; label: string; badge: string }[] = [
   { value: 'maintenance', label: 'Onderhoud',  badge: 'badge-maintenance' },
 ];
 
+const POINT_TYPE_LABELS: Record<string, string> = {
+  trash_bin: '🗑️ Afvalbak',
+  asset: '📦 Materieel',
+  other: '📍 Overig',
+};
+
+interface PointFormData {
+  title: string;
+  type: 'trash_bin' | 'asset' | 'other';
+  notes: string;
+}
+
 export default function AdminZonesPage() {
+  // Mode toggle
+  const [mode, setMode] = useState<'zone' | 'point'>('zone');
+  
+  // Zones state
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
   const [drawnGeojson, setDrawnGeojson] = useState<GeoJSON.Feature | null>(null);
@@ -59,6 +75,18 @@ export default function AdminZonesPage() {
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Points state
+  const [points, setPoints] = useState<Point[]>([]);
+  const [showPointForm, setShowPointForm] = useState(false);
+  const [pointFormData, setPointFormData] = useState<PointFormData>({
+    title: '',
+    type: 'trash_bin',
+    notes: '',
+  });
+  const [pointGeojson, setPointGeojson] = useState<GeoJSON.Feature | null>(null);
+  const [savingPoint, setSavingPoint] = useState(false);
+  const [pointError, setPointError] = useState<string | null>(null);
+
   const loadZones = async () => {
     try {
       const res = await fetch('/api/zones');
@@ -72,8 +100,20 @@ export default function AdminZonesPage() {
     }
   };
 
+  const loadPoints = async () => {
+    try {
+      const res = await fetch('/api/points');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setPoints(Array.isArray(data) ? data : []);
+    } catch {
+      // ignore — points will remain empty
+    }
+  };
+
   useEffect(() => {
     loadZones();
+    loadPoints();
   }, []);
 
   const handlePolygonDrawn = (geojson: GeoJSON.Feature) => {
@@ -90,6 +130,16 @@ export default function AdminZonesPage() {
       next_scheduled_work: '',
     });
     setTagInput('');
+  };
+
+  const handleMarkerPlaced = (geojson: GeoJSON.Feature) => {
+    setPointGeojson(geojson);
+    setShowPointForm(true);
+    setPointFormData({
+      title: '',
+      type: 'trash_bin',
+      notes: '',
+    });
   };
 
   const handleEditZone = (zone: Zone) => {
@@ -162,6 +212,56 @@ export default function AdminZonesPage() {
     }
   };
 
+  const handleSavePoint = async () => {
+    if (!pointFormData.title.trim()) {
+      setPointError('Titel is verplicht');
+      return;
+    }
+    if (!pointGeojson) {
+      setPointError('Plaats een markering op de kaart');
+      return;
+    }
+
+    setSavingPoint(true);
+    setPointError(null);
+
+    try {
+      const res = await fetch('/api/points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...pointFormData, geojson: pointGeojson }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Mislukt om punt op te slaan');
+      }
+
+      await loadPoints();
+      setShowPointForm(false);
+      setPointGeojson(null);
+    } catch (err) {
+      setPointError(err instanceof Error ? err.message : 'Er is iets misgegaan');
+    } finally {
+      setSavingPoint(false);
+    }
+  };
+
+  const handleDeletePoint = async (pointId: string) => {
+    if (!confirm('Dit punt verwijderen?')) return;
+    setDeletingId(pointId);
+
+    try {
+      const res = await fetch(`/api/points/${pointId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Mislukt om te verwijderen');
+      await loadPoints();
+    } catch {
+      alert('Mislukt om punt te verwijderen');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col pb-safe" style={{ background: 'var(--color-bg)' }}>
       {/* Header */}
@@ -180,21 +280,36 @@ export default function AdminZonesPage() {
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </Link>
-        <h1 className="text-lg font-bold text-white flex-1">Zonebeheer</h1>
+        <h1 className="text-lg font-bold text-white flex-1">Beheer</h1>
+        
+        {/* Mode toggle */}
+        <button
+          onClick={() => setMode(mode === 'zone' ? 'point' : 'zone')}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all touch-manipulation"
+          style={{ background: 'rgba(255,255,255,0.15)' }}
+        >
+          {mode === 'zone' ? <ToggleLeft className="w-4 h-4" /> : <ToggleRight className="w-4 h-4" />}
+          {mode === 'zone' ? 'Zones' : 'Punten'}
+        </button>
+        
         <div
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-white"
           style={{ background: 'rgba(255,255,255,0.15)' }}
         >
           <MapPin className="w-3.5 h-3.5" />
-          {zones.length} zone{zones.length !== 1 ? 's' : ''}
+          {mode === 'zone' ? `${zones.length} zone${zones.length !== 1 ? 's' : ''}` : `${points.length} punt${points.length > 1 ? 'en' : ''}`}
         </div>
       </div>
 
       {/* Instructions banner when no form is showing */}
-      {!showForm && (
+      {!showForm && !showPointForm && (
         <div className="px-4 py-3 bg-blue-50 border-b border-blue-200">
           <p className="text-sm text-blue-900">
-            <span className="font-semibold">💡 Om een nieuwe zone toe te voegen:</span> Gebruik de tekengereedschappen linksboven op de kaart (polygoon of rechthoek icoon) om een zone te tekenen, en vul vervolgens de details in.
+            {mode === 'zone' ? (
+              <><span className="font-semibold">💡 Om een nieuwe zone toe te voegen:</span> Gebruik de tekengereedschappen linksboven op de kaart (polygoon of rechthoek icoon) om een zone te tekenen, en vul vervolgens de details in.</>
+            ) : (
+              <><span className="font-semibold">📍 Om een nieuw punt toe te voegen:</span> Klik op het markering icoon linksboven op de kaart, plaats de markering op de gewenste locatie, en vul vervolgens de details in.</>
+            )}
           </p>
         </div>
       )}
@@ -206,6 +321,8 @@ export default function AdminZonesPage() {
             zones={zones}
             onPolygonDrawn={handlePolygonDrawn}
             editingGeojson={editingZone ? editingZone.geojson : null}
+            onMarkerPlaced={handleMarkerPlaced}
+            enableMarker={mode === 'point'}
           />
         </div>
 
@@ -392,7 +509,91 @@ export default function AdminZonesPage() {
             </div>
           )}
 
+          {/* Point form */}
+          {showPointForm && (
+            <div className="p-5" style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-2)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="w-4 h-4 text-[var(--color-primary)]" />
+                <h2 className="font-bold text-[var(--color-text)]">Nieuw Punt</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Titel *
+                  </label>
+                  <input
+                    type="text"
+                    value={pointFormData.title}
+                    onChange={(e) => setPointFormData((p) => ({ ...p, title: e.target.value }))}
+                    className="input"
+                    placeholder="bijv. Afvalbak A1"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Type
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(['trash_bin', 'asset', 'other'] as const).map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setPointFormData((p) => ({ ...p, type: t }))}
+                        className={`py-2.5 px-3 rounded-xl text-xs font-semibold border-2 transition-all active:scale-95 touch-manipulation ${
+                          pointFormData.type === t
+                            ? 'bg-[var(--color-primary)] border-[var(--color-primary)] text-white'
+                            : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-secondary)]'
+                        }`}
+                      >
+                        {POINT_TYPE_LABELS[t]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
+                    Notities
+                  </label>
+                  <textarea
+                    value={pointFormData.notes}
+                    onChange={(e) => setPointFormData((p) => ({ ...p, notes: e.target.value }))}
+                    className="input resize-none"
+                    placeholder="Optionele notities…"
+                    rows={3}
+                  />
+                </div>
+
+                {pointError && (
+                  <p className="text-[var(--color-danger)] text-sm bg-red-50 px-4 py-3 rounded-xl border border-red-200 font-medium">
+                    {pointError}
+                  </p>
+                )}
+
+                <div className="flex gap-2.5">
+                  <button
+                    onClick={handleSavePoint}
+                    disabled={savingPoint}
+                    className="btn btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingPoint ? 'Opslaan…' : 'Punt Opslaan'}
+                  </button>
+                  <button
+                    onClick={() => { setShowPointForm(false); setPointGeojson(null); }}
+                    className="btn btn-ghost"
+                  >
+                    Annuleren
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Zone list */}
+          {mode === 'zone' && (
           <div className="p-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-4">
               Alle Zones
@@ -489,6 +690,64 @@ export default function AdminZonesPage() {
               </ul>
             )}
           </div>
+          )}
+
+          {/* Points list */}
+          {mode === 'point' && (
+          <div className="p-5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-4">
+              Alle Punten
+            </h2>
+
+            {loading ? (
+              <p className="text-[var(--color-text-light)] text-sm text-center py-6">Laden…</p>
+            ) : points.length === 0 ? (
+              <div className="text-center py-10 px-4">
+                <MapPin className="w-10 h-10 mx-auto mb-3 text-[var(--color-text-light)]" />
+                <p className="text-[var(--color-text)] font-semibold mb-2">
+                  Nog geen punten
+                </p>
+                <p className="text-[var(--color-text-light)] text-sm">
+                  Klik op het <strong>markering</strong> icoon linksboven op de kaart om uw eerste punt te plaatsen.
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {points.map((point) => (
+                  <li
+                    key={point.id}
+                    className="flex items-center justify-between rounded-xl px-4 py-3.5 border-2 transition-colors"
+                    style={{ background: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-[var(--color-text)] truncate">{point.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-[var(--color-text-muted)]">
+                          {POINT_TYPE_LABELS[point.type]}
+                        </span>
+                      </div>
+                      {point.notes && (
+                        <p className="text-xs text-[var(--color-text-light)] mt-1 truncate">{point.notes}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 ml-3">
+                      <button
+                        onClick={() => handleDeletePoint(point.id)}
+                        disabled={deletingId === point.id}
+                        className="p-2.5 rounded-xl transition-colors disabled:opacity-50 touch-manipulation"
+                        style={{ color: 'var(--color-danger)' }}
+                        title="Verwijder punt"
+                        aria-label={`Verwijder ${point.title}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          )}
         </div>
       </div>
     </div>

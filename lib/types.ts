@@ -4,6 +4,8 @@ export type WeatherCondition = 'good' | 'normal' | 'bad';
 export type DifficultyLevel = 'normal' | 'dirty' | 'heavy';
 export type TaskMode = 'productive' | 'non_productive';
 export type PointType = 'trash_bin' | 'asset' | 'other';
+export type DaySessionMode = 'productive' | 'non_productive';
+export type NonProductiveReason = 'driving' | 'break' | 'loading' | 'talking' | 'other';
 
 export interface Zone {
   id: string;
@@ -76,4 +78,20 @@ export interface KpiData {
   timePerM2ByZone: { zone_id: string; zone_name: string; area_m2: number; minutes_per_m2: number }[];
   productiveRatio: { productive_minutes: number; non_productive_minutes: number; ratio: number };
   varianceByZone: { zone_id: string; zone_name: string; avg_minutes: number; variance: number; std_dev: number }[];
+}
+
+export interface DaySession {
+  id: string;
+  date: string;
+  mode: DaySessionMode;
+  start_time: string;
+  end_time: string | null;
+  non_productive_reason: NonProductiveReason | null;
+  created_at: string;
+}
+
+export interface DaySessionSummary {
+  total_productive_minutes: number;
+  total_non_productive_minutes: number;
+  active_session: DaySession | null;
 }

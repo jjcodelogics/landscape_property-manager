@@ -6,16 +6,11 @@ import Sidebar from '@/components/Sidebar';
 import TaskForm from '@/components/TaskForm';
 import ZoneInstructionsGenerator from '@/components/ZoneInstructionsGenerator';
 import { Zone } from '@/lib/types';
-import { BarChart2, Settings, Leaf, CalendarDays, Route, TrendingUp, FileText } from 'lucide-react';
+import { BarChart2, Settings, Leaf, CalendarDays, Route, TrendingUp, FileText, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { getZoneColorLegend } from '@/lib/zone-colors';
 
 const Map = dynamic(() => import('@/components/Map'), { ssr: false });
-
-const ZONE_TYPE_SWATCHES = [
-  { type: 'grass',       color: '#6aa84f', label: 'Grasonderhoud' },
-  { type: 'waste',       color: '#3d85c6', label: 'Afvalbeheer' },
-  { type: 'maintenance', color: '#e69138', label: 'Onderhoud' },
-];
 
 export default function Home() {
   const [zones, setZones] = useState<Zone[]>([]);
@@ -23,6 +18,7 @@ export default function Home() {
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showAnalyticsDropdown, setShowAnalyticsDropdown] = useState(false);
 
   const loadZones = useCallback(async () => {
     try {
@@ -95,16 +91,6 @@ export default function Home() {
         </div>
 
         <nav className="flex items-center gap-1.5">
-          <button
-            onClick={() => setShowInstructions(true)}
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
-            style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Zoneinstructies"
-            title="Zoneinstructies Generator"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Instructies</span>
-          </button>
           <Link
             href="/plan"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
@@ -121,26 +107,70 @@ export default function Home() {
             aria-label="Punten en routes"
           >
             <Route className="w-4 h-4" />
-            <span className="hidden lg:inline">Routes</span>
+            <span className="hidden sm:inline">Routes</span>
           </Link>
-          <Link
-            href="/kpi"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
-            style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="KPI analyses"
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span className="hidden lg:inline">KPI</span>
-          </Link>
-          <Link
-            href="/stats"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
-            style={{ background: 'rgba(255,255,255,0.12)' }}
-            aria-label="Bekijk statistieken"
-          >
-            <BarChart2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Statistieken</span>
-          </Link>
+          
+          {/* Analytics Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowAnalyticsDropdown(!showAnalyticsDropdown)}
+              className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+              style={{ background: 'rgba(255,255,255,0.12)' }}
+              aria-label="Analytics menu"
+            >
+              <TrendingUp className="w-4 h-4" />
+              <span className="hidden sm:inline">Analytics</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            
+            {showAnalyticsDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[1000]" 
+                  onClick={() => setShowAnalyticsDropdown(false)}
+                />
+                <div
+                  className="absolute right-0 mt-2 w-48 rounded-xl shadow-xl z-[1001] py-1"
+                  style={{
+                    background: 'rgba(255,255,255,0.98)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(0,95,115,0.1)',
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setShowInstructions(true);
+                      setShowAnalyticsDropdown(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--color-text)' }}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Instructies</span>
+                  </button>
+                  <Link
+                    href="/kpi"
+                    onClick={() => setShowAnalyticsDropdown(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--color-text)' }}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    <span>KPI</span>
+                  </Link>
+                  <Link
+                    href="/stats"
+                    onClick={() => setShowAnalyticsDropdown(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium transition-colors"
+                    style={{ color: 'var(--color-text)' }}
+                  >
+                    <BarChart2 className="w-4 h-4" />
+                    <span>Statistieken</span>
+                  </Link>
+                </div>
+              </>
+            )}
+          </div>
+
           <Link
             href="/admin/zones"
             className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
@@ -211,17 +241,20 @@ export default function Home() {
         }}
       >
         <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--color-primary)' }}>
-          Zone Types
+          Last Worked
         </p>
         <div className="space-y-1.5">
-          {ZONE_TYPE_SWATCHES.map((item) => (
-            <div key={item.type} className="flex items-center gap-2">
+          {getZoneColorLegend().map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
               <span
                 className="w-3.5 h-3.5 rounded-sm flex-shrink-0"
                 style={{ background: item.color }}
               />
               <span className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>
                 {item.label}
+                <span className="text-xs text-[var(--color-text-muted)] ml-1.5">
+                  {item.description}
+                </span>
               </span>
             </div>
           ))}
