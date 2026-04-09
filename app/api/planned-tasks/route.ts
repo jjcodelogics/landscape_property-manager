@@ -63,7 +63,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(data || [], {
-      headers: getRateLimitHeaders(rateLimitResult),
+      headers: {
+        ...getRateLimitHeaders(rateLimitResult),
+        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+      },
     });
   } catch (err) {
     logger.error('Unexpected error:', err);
@@ -141,20 +144,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const minutesValidation = validatePositiveInteger(estimatedMinutes);
-    if (!minutesValidation.valid) {
-      return NextResponse.json(
-        { error: minutesValidation.error },
-        { 
-          status: 400,
-          headers: getRateLimitHeaders(rateLimitResult),
-        }
-      );
-    }, 'Estimated minutes'); .from('planned_tasks')
+    const validatedMinutes = validatePositiveInteger(estimatedMinutes, 'Estimated minutes');
+
+    // Insert into database
+    const { data, error: insertError } = await supabase
+      .from('planned_tasks')
       .insert({
         date: body.date,
         zone_id: body.zone_id,
-        estimated_minutes: estimatedMinutes,
+        estimated_minutes: validatedMinutes,
         notes: body.notes || null,
       })
       .select('*, zones(id, title, name, type)')
