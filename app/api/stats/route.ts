@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (tasksError) {
-      logger.error('Database error:', tasksError);
+      console.error('Database error:', tasksError);
       return NextResponse.json(
         { error: sanitizeErrorMessage(tasksError) },
         { 
@@ -108,11 +108,14 @@ export async function GET(request: NextRequest) {
         kpi: { timePerM2ByZone, productiveRatio, varianceByZone },
       },
       {
-        headers: getRateLimitHeaders(rateLimitResult),
+        headers: {
+          ...getRateLimitHeaders(rateLimitResult),
+          'Cache-Control': 'private, max-age=120, stale-while-revalidate=240',
+        },
       }
     );
   } catch (error) {
-    logger.error('Unexpected error:', error);
+    console.error('Unexpected error:', error);
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) },
       { 
