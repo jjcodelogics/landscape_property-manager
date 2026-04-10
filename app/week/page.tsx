@@ -1,33 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
-
-export default function WeekCalendarPage() {
-  const router = useRouter();
-
-  return (
-    <div className="min-h-screen bg-[var(--color-bg)] flex flex-col items-center justify-center p-4">
-      <div className="max-w-md w-full bg-[var(--color-surface)] rounded-lg shadow-lg p-6 text-center">
-        <h1 className="text-2xl font-bold text-[var(--color-text)] mb-4">
-          Week Overzicht
-        </h1>
-        <p className="text-[var(--color-text-muted)] mb-6">
-          Deze pagina is tijdelijk uitgeschakeld voor onderhoud.
-        </p>
-        <button
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 transition-opacity"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Terug
-        </button>
-      </div>
-    </div>
-  );
-}
-'use client';
-
 import { useState, useEffect, useMemo } from 'react';
 import { TaskWithZone, PlannedTaskWithZone, DayConfig, TaskType, ZoneType } from '@/lib/types';
 import { ArrowLeft, ChevronLeft, ChevronRight, Calendar, Scissors, Trash2, Wrench, Plus, X, Users, Clock, Edit2, Check } from 'lucide-react';
