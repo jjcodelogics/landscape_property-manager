@@ -342,7 +342,7 @@ export default function WeekCalendarPage() {
       {/* Mobile: Scrollable Days */}
       <div className="md:hidden overflow-x-auto">
         <div className="flex gap-4 p-4 min-w-min">
-          {weekData.map((day) => (
+          {weeklyData.map((day) => (
             <DayCard 
               key={day.dateStr} 
               day={day} 
@@ -356,7 +356,7 @@ export default function WeekCalendarPage() {
 
       {/* Desktop: Grid Layout */}
       <div className="hidden md:grid md:grid-cols-5 gap-4 p-4">
-        {weekData.slice(1, 6).map((day) => ( // Mon-Fri only for desktop
+        {weeklyData.slice(1, 6).map((day) => ( // Mon-Fri only for desktop
           <DayCard 
             key={day.dateStr} 
             day={day} 
