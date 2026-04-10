@@ -423,43 +423,11 @@ interface DayCardProps {
 }
 
 function DayCard({ day, formatDuration, onAddPlan, onDeletePlanned }: DayCardProps) {
-  onAddPlan: (dateStr: string) => void;
-  onDeletePlanned: (plannedId: string) => void;
-}
-
-function DayCard({ day, formatDuration, onAddPlan, onDeletePlanned
-        <div className="m-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
-
-      {/* Mobile: Vertical Day List */}
-      <div className="md:hidden px-4 py-4 space-y-4">
-        {weekData.map((day) => (
-          <DayCard key={day.dateStr} day={day} formatDuration={formatDuration} />
-        ))}
-      </div>
-
-      {/* Desktop: Grid Layout */}
-      <div className="hidden md:grid md:grid-cols-5 gap-4 p-4">
-        {weekData.slice(1, 6).map((day) => ( // Mon-Fri only for desktop
-          <DayCard key={day.dateStr} day={day} formatDuration={formatDuration} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-interface DayCardProps {
-  day: DayData;
-  formatDuration: (minutes: number) => string;
-}
-
-function DayCard({ day, formatDuration }: DayCardProps) {
   const isToday = useMemo(() => {
     const today = new Date();
     return day.date.toDateString() === today.toDateString();
   }, [day.date]);
+  const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
   const hasPlannedTasks = day.plannedTasks.length > 0;
   const hasCompletedTasks = day.tasks.length > 0;
 
@@ -546,9 +514,7 @@ function DayCard({ day, formatDuration }: DayCardProps) {
         >
           <Plus className="w-4 h-4" />
           <span>Zone plannen</span>
-        </button>  ))}
-          </div>
-        )}
+        </button>
       </div>
     </div>
   );
