@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError } = await supabase
       .from('planned_tasks')
-      .select('*, zones(id, title, name, type)')
+      .select('*, zones(id, title, type)')
       .gte('date', startDate)
       .lte('date', endDate)
       .order('date', { ascending: true });
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
         team_members: validatedTeamMembers,
         notes: body.notes || null,
       })
-      .select('*, zones(id, title, name, type)')
+      .select('*, zones(id, title, type)')
       .single();
 
     if (insertError) {

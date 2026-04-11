@@ -8,7 +8,6 @@ export const HARDCODED_ZONES: Zone[] = [
   {
     id: '550e8400-e29b-41d4-a716-446655440000',
     title: 'North Entrance Lawn',
-    name: 'North Entrance Lawn',
     type: 'grass',
     instructions: `## Tasks
 - Weekly mowing during growing season (April–October)
@@ -48,13 +47,13 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
     title: 'Main Parking Area',
-    name: 'Main Parking Area',
-    type: 'waste',
+    type: 'maintenance',
     instructions: `## Tasks
 - Empty waste bins: Mon, Wed, Fri (7:00 AM)
 - Sweep parking area: Daily
@@ -97,12 +96,12 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '6ba7b811-9dad-11d1-80b4-00c04fd430c8',
     title: 'East Building Maintenance',
-    name: 'East Building Maintenance',
     type: 'maintenance',
     instructions: `## Tasks
 - Monthly equipment inspection
@@ -150,12 +149,12 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '6ba7b812-9dad-11d1-80b4-00c04fd430c8',
     title: 'Storage Yard',
-    name: 'Storage Yard',
     type: 'maintenance',
     instructions: `## Tasks
 - Daily sweep & debris removal
@@ -197,12 +196,12 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '6ba7b813-9dad-11d1-80b4-00c04fd430c8',
     title: 'South Sports Field',
-    name: 'South Sports Field',
     type: 'grass',
     instructions: `## Tasks
 - Mowing: Every 7 days during season
@@ -246,12 +245,12 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
   {
     id: '6ba7b814-9dad-11d1-80b4-00c04fd430c8',
     title: 'Central Garden',
-    name: 'Central Garden',
     type: 'grass',
     instructions: `## Tasks
 - Mowing: Every 10 days
@@ -297,6 +296,7 @@ export const HARDCODED_ZONES: Zone[] = [
     tags: [],
     last_worked_at: null,
     next_scheduled_work: null,
+    frequency: null,
     created_at: new Date().toISOString(),
   },
 ];

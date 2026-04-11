@@ -99,7 +99,7 @@ export default function PlannedTaskEditModal({
         {/* Header */}
         <div className="sticky top-0 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 py-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-[var(--color-text)]">
-            {plannedTask.zones?.title || plannedTask.zones?.name || 'Zone'}
+            {plannedTask.zones?.title || 'Zone'}
           </h2>
           <button
             onClick={onClose}

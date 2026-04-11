@@ -8,7 +8,6 @@ import TaskEditModal from '@/components/TaskEditModal';
 
 const TASK_TYPE_CONFIG: Record<TaskType, { label: string; icon: React.ReactNode }> = {
   mowing:      { label: 'Maaien',     icon: <Scissors className="w-4 h-4" /> },
-  waste:       { label: 'Afval',      icon: <Trash2   className="w-4 h-4" /> },
   maintenance: { label: 'Onderhoud', icon: <Wrench   className="w-4 h-4" /> },
 };
 
@@ -125,7 +124,7 @@ export default function TasksPage() {
         ) : (
           tasks.map((task) => {
             const taskConfig = TASK_TYPE_CONFIG[task.task_type];
-            const zoneName = task.zones?.title || task.zones?.name || 'Onbekende zone';
+            const zoneName = task.zones?.title || 'Onbekende zone';
             
             return (
               <div

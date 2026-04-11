@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error: dbError } = await supabase
       .from('tasks')
-      .select('*, zones(id, title, name, type)')
+      .select('*, zones(id, title, type)')
       .gte('created_at', `${startDate}T00:00:00`)
       .lte('created_at', `${endDate}T23:59:59`)
       .order('created_at', { ascending: false });

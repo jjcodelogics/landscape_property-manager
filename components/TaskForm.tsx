@@ -11,9 +11,8 @@ interface TaskFormProps {
 }
 
 const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = [
-  { value: 'mowing',      label: 'Maaien',      icon: <Scissors className="w-4 h-4" /> },
-  { value: 'waste',       label: 'Afval',        icon: <Trash2   className="w-4 h-4" /> },
-  { value: 'maintenance', label: 'Onderhoud',  icon: <Wrench   className="w-4 h-4" /> },
+  { value: 'mowing',      label: 'Maaien',     icon: <Scissors className="w-4 h-4" /> },
+  { value: 'maintenance', label: 'Onderhoud', icon: <Wrench   className="w-4 h-4" /> },
 ];
 
 const WEATHER_OPTIONS: { value: WeatherCondition; label: string; emoji: string }[] = [

@@ -9,7 +9,6 @@ import { getZoneStatusLabel, getZoneColorByLastWorked } from '@/lib/zone-colors'
 
 const ZONE_TYPE_LABELS: Record<string, string> = {
   grass:       'Grasonderhoud',
-  waste:       'Afvalbeheer',
   maintenance: 'Onderhoud',
 };
 
@@ -74,12 +73,7 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
     }
   };
 
-  const badgeClass =
-    zone.type === 'grass'
-      ? 'badge-grass'
-      : zone.type === 'waste'
-      ? 'badge-waste'
-      : 'badge-maintenance';
+  const badgeClass = zone.type === 'grass' ? 'badge-grass' : 'badge-maintenance';
 
   return (
     <>

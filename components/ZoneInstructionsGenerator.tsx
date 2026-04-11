@@ -23,7 +23,7 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
 
   const combinedText = selectedZones
     .map((z) => {
-      const header = `# ${z.title}${z.name && z.name !== z.title ? ` — ${z.name}` : ''}`;
+      const header = `# ${z.title}`;
       const meta = [
         z.area_m2 ? `📐 Area: ${z.area_m2.toLocaleString()} m²` : null,
         z.tags?.length ? `🏷️ Tags: ${z.tags.map((t) => `#${t}`).join(', ')}` : null,

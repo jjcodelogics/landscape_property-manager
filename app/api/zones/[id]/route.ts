@@ -16,13 +16,13 @@ import { logger } from '@/lib/logger';
 
 interface UpdateZoneRequest {
   title: string;
-  name: string;
   type: string;
   instructions?: string;
   geojson: unknown;
   tags?: unknown;
   last_worked_at?: string;
   next_scheduled_work?: string;
+  frequency?: string;
 }
 
 export async function PUT(
@@ -69,7 +69,6 @@ export async function PUT(
 
     // Validate and sanitize inputs
     const title = validateText(body.title, 'Title', { maxLength: 200 });
-    const name = validateText(body.name || '', 'Name', { required: false, maxLength: 200 }) || null;
     const type = validateZoneType(body.type);
     const instructions = validateText(body.instructions || '', 'Instructions', {
       required: false,
@@ -80,11 +79,12 @@ export async function PUT(
     const tags = validateTags(body.tags ?? []);
     const last_worked_at = validateISODate(body.last_worked_at, 'Last worked at', { required: false });
     const next_scheduled_work = validateISODate(body.next_scheduled_work, 'Next scheduled work', { required: false });
+    const frequency = body.frequency?.trim() || null;
 
     // Update database
     const { data, error: dbError } = await supabase
       .from('zones')
-      .update({ title, name, type, instructions, geojson, area_m2, tags, last_worked_at, next_scheduled_work })
+      .update({ title, type, instructions, geojson, area_m2, tags, last_worked_at, next_scheduled_work, frequency })
       .eq('id', validatedId)
       .select()
       .single();

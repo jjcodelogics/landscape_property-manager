@@ -18,6 +18,7 @@ export interface Zone {
   area_m2: number | null;
   tags: string[];
   last_worked_at: string | null;
+  next_scheduled_work: string | null;
   frequency: string | null;
   created_at: string;
 }

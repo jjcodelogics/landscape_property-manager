@@ -29,16 +29,7 @@ export async function PUT(
   try {
     const { id } = await params;
     
-    const idValidation = validateUUID(id, 'Planned task ID');
-    if (!idValidation.valid) {
-      return NextResponse.json(
-        { error: idValidation.error },
-        {
-          status: 400,
-          headers: getRateLimitHeaders(rateLimitResult),
-        }
-      );
-    }
+    const validatedId = validateUUID(id, 'Planned task ID');
 
     const contentType = request.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
@@ -108,8 +99,8 @@ export async function PUT(
     const { data, error: updateError } = await supabase
       .from('planned_tasks')
       .update(updateData)
-      .eq('id', id)
-      .select('*, zones(id, title, name, type)')
+      .eq('id', validatedId)
+      .select('*, zones(id, title, type)')
       .single();
 
     if (updateError) {
@@ -170,12 +161,12 @@ export async function DELETE(
   try {
     const { id } = await params;
     
-    const idValidation = validateUUID(id, 'Planned task ID');
+    const validatedDeleteId = validateUUID(id, 'Planned task ID');
 
     const { error: deleteError } = await supabase
       .from('planned_tasks')
       .delete()
-      .eq('id', id);
+      .eq('id', validatedDeleteId);
 
     if (deleteError) {
       logger.error('Database error:', deleteError);

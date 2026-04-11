@@ -6,13 +6,11 @@ import { X, Search, Scissors, Trash2, Wrench, Tag, Loader2 } from 'lucide-react'
 
 const ZONE_TYPE_CONFIG: Record<ZoneType, { label: string; icon: React.ReactNode; color: string }> = {
   grass:       { label: 'Grasonderhoud', icon: <Scissors className="w-4 h-4" />, color: 'text-green-600' },
-  waste:       { label: 'Afvalbeheer',   icon: <Trash2   className="w-4 h-4" />, color: 'text-blue-600' },
   maintenance: { label: 'Onderhoud',    icon: <Wrench   className="w-4 h-4" />, color: 'text-orange-600' },
 };
 
 const ZONE_TYPE_COLORS: Record<ZoneType, string> = {
   grass:       'bg-[var(--color-zone-grass)]',
-  waste:       'bg-[var(--color-zone-waste)]',
   maintenance: 'bg-[var(--color-zone-maintenance)]',
 };
 

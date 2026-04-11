@@ -12,9 +12,8 @@ interface TaskEditModalProps {
 }
 
 const TASK_TYPES: { value: TaskType; label: string; icon: React.ReactNode }[] = [
-  { value: 'mowing',      label: 'Maaien',      icon: <Scissors className="w-4 h-4" /> },
-  { value: 'waste',       label: 'Afval',        icon: <Trash2   className="w-4 h-4" /> },
-  { value: 'maintenance', label: 'Onderhoud',  icon: <Wrench   className="w-4 h-4" /> },
+  { value: 'mowing',      label: 'Maaien',     icon: <Scissors className="w-4 h-4" /> },
+  { value: 'maintenance', label: 'Onderhoud', icon: <Wrench   className="w-4 h-4" /> },
 ];
 
 const WEATHER_OPTIONS: { value: WeatherCondition; label: string; emoji: string }[] = [
@@ -103,7 +102,7 @@ export default function TaskEditModal({ task, onClose, onSuccess, onDelete }: Ta
     }
   };
 
-  const zoneName = task.zones?.title || task.zones?.name || 'Onbekende zone';
+  const zoneName = task.zones?.title || 'Onbekende zone';
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[2000] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
