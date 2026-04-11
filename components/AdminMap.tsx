@@ -4,18 +4,19 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { Zone } from '@/lib/types';
+import { Zone, Point } from '@/lib/types';
 import { getZoneColorByLastWorked } from '@/lib/zone-colors';
 
 interface AdminMapProps {
   zones: Zone[];
+  points?: Point[];
   onPolygonDrawn: (geojson: GeoJSON.Feature) => void;
   editingGeojson: GeoJSON.Feature | null;
   onMarkerPlaced?: (geojson: GeoJSON.Feature) => void;
   enableMarker?: boolean;
 }
 
-export default function AdminMap({ zones, onPolygonDrawn, editingGeojson, onMarkerPlaced, enableMarker = false }: AdminMapProps) {
+export default function AdminMap({ zones, points = [], onPolygonDrawn, editingGeojson, onMarkerPlaced, enableMarker = false }: AdminMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const drawnItemsRef = useRef<L.FeatureGroup | null>(null);
@@ -115,7 +116,7 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson, onMark
     if (!map) return;
 
     map.eachLayer((layer) => {
-      if (layer instanceof L.GeoJSON) {
+      if (layer instanceof L.GeoJSON || layer instanceof L.Marker) {
         map.removeLayer(layer);
       }
     });
@@ -129,12 +130,41 @@ export default function AdminMap({ zones, onPolygonDrawn, editingGeojson, onMark
         .addTo(map);
     });
 
+    // Display points
+    points.forEach((point) => {
+      if (point.geojson.geometry.type !== 'Point') return;
+      
+      const coords = point.geojson.geometry.coordinates as [number, number];
+      const [lng, lat] = coords;
+
+      // Create custom icon based on point type
+      const iconEmoji = point.type === 'trash_bin' ? '🗑️' : point.type === 'asset' ? '📦' : '📍';
+      const icon = L.divIcon({
+        className: 'custom-point-icon',
+        html: `<div style="
+          font-size: 24px;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        ">${iconEmoji}</div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      L.marker([lat, lng], { icon })
+        .bindTooltip(`${iconEmoji} ${point.title}`, { permanent: false, direction: 'top' })
+        .addTo(map);
+    });
+
     if (zones.length > 0) {
       const bounds = zones.map((z) => L.geoJSON(z.geojson).getBounds());
       const combined = bounds.reduce((acc, b) => acc.extend(b));
       if (combined.isValid()) map.fitBounds(combined, { padding: [40, 40] });
     }
-  }, [zones]);
+  }, [zones, points]);
 
   useEffect(() => {
     const drawnItems = drawnItemsRef.current;

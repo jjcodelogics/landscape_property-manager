@@ -134,9 +134,6 @@ export default function ZoneInstructionsGenerator({ zones, onClose }: ZoneInstru
                       {idx > 0 && <hr style={{ borderColor: 'var(--color-border)' }} className="mb-8" />}
                       <div className="mb-3">
                         <h2 className="text-base font-bold text-[var(--color-text)]">{zone.title}</h2>
-                        {zone.name && zone.name !== zone.title && (
-                          <p className="text-sm text-[var(--color-text-muted)]">{zone.name}</p>
-                        )}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${ZONE_TYPE_BADGE[zone.type]}`}>{zone.type}</span>
                           {zone.area_m2 ? <span className="text-xs text-[var(--color-text-muted)]">📐 {zone.area_m2.toLocaleString()} m²</span> : null}

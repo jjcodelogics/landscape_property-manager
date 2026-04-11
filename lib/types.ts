@@ -1,23 +1,24 @@
-export type ZoneType = 'grass' | 'waste' | 'maintenance';
-export type TaskType = 'mowing' | 'waste' | 'maintenance';
+export type ZoneType = 'grass' | 'maintenance';
+export type TaskType = 'mowing' | 'maintenance';
 export type WeatherCondition = 'good' | 'normal' | 'bad';
 export type DifficultyLevel = 'normal' | 'dirty' | 'heavy';
 export type TaskMode = 'productive' | 'non_productive';
 export type PointType = 'trash_bin' | 'asset' | 'other';
 export type DaySessionMode = 'productive' | 'non_productive';
 export type NonProductiveReason = 'driving' | 'break' | 'loading' | 'talking' | 'other';
+export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly';
+export type RecurringType = 'zone' | 'custom';
 
 export interface Zone {
   id: string;
   title: string;
-  name: string | null;
   type: ZoneType;
   instructions: string | null;
   geojson: GeoJSON.Feature;
   area_m2: number | null;
   tags: string[];
   last_worked_at: string | null;
-  next_scheduled_work: string | null;
+  frequency: string | null;
   created_at: string;
 }
 
@@ -36,7 +37,7 @@ export interface Task {
 }
 
 export interface TaskWithZone extends Task {
-  zones?: Pick<Zone, 'id' | 'title' | 'name' | 'type'>;
+  zones?: Pick<Zone, 'id' | 'title' | 'type'>;
 }
 
 export interface ZoneStats {
@@ -101,12 +102,13 @@ export interface PlannedTask {
   date: string;
   zone_id: string;
   estimated_minutes: number;
+  team_members: number;
   notes: string | null;
   created_at: string;
 }
 
 export interface PlannedTaskWithZone extends PlannedTask {
-  zones?: Pick<Zone, 'id' | 'title' | 'name' | 'type'>;
+  zones?: Pick<Zone, 'id' | 'title' | 'type'>;
 }
 
 export interface DayConfig {
@@ -116,4 +118,19 @@ export interface DayConfig {
   hours_per_member: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface RecurringTask {
+  id: string;
+  title: string;
+  type: RecurringType;
+  zone_id: string | null;
+  custom_description: string | null;
+  frequency: RecurringFrequency;
+  day_of_week: number;
+  created_at: string;
+}
+
+export interface RecurringTaskWithZone extends RecurringTask {
+  zones?: Pick<Zone, 'id' | 'title' | 'type'>;
 }

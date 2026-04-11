@@ -8,6 +8,7 @@ interface CreatePlannedTaskRequest {
   date: string;
   zone_id: string;
   estimated_minutes?: number;
+  team_members?: number;
   notes?: string;
 }
 
@@ -146,6 +147,10 @@ export async function POST(request: NextRequest) {
 
     const validatedMinutes = validatePositiveInteger(estimatedMinutes, 'Estimated minutes');
 
+    // Validate team_members (default to 1)
+    const teamMembers = body.team_members || 1;
+    const validatedTeamMembers = validatePositiveInteger(teamMembers, 'Team members');
+
     // Insert into database
     const { data, error: insertError } = await supabase
       .from('planned_tasks')
@@ -153,6 +158,7 @@ export async function POST(request: NextRequest) {
         date: body.date,
         zone_id: body.zone_id,
         estimated_minutes: validatedMinutes,
+        team_members: validatedTeamMembers,
         notes: body.notes || null,
       })
       .select('*, zones(id, title, name, type)')

@@ -50,13 +50,12 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: zone.title,
-          name: zone.name,
           type: zone.type,
           instructions: editedInstructions,
           geojson: zone.geojson,
           tags: zone.tags,
           last_worked_at: zone.last_worked_at,
-          next_scheduled_work: zone.next_scheduled_work,
+          frequency: zone.frequency,
         }),
       });
 
@@ -112,11 +111,6 @@ export default function Sidebar({ zone, onClose, onLogTask, onZoneUpdated }: Sid
             <h2 className="text-xl font-bold text-[var(--color-text)] truncate leading-tight">
               {zone.title}
             </h2>
-            {zone.name && (
-              <p className="text-sm text-[var(--color-text-muted)] truncate mt-0.5">
-                {zone.name}
-              </p>
-            )}
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <span
                 className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide ${badgeClass}`}

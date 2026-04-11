@@ -69,10 +69,9 @@ export default function ZonePlanModal({
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = zone.title.toLowerCase().includes(query);
-        const matchesName = zone.name?.toLowerCase().includes(query);
         const matchesTags = zone.tags?.some(tag => tag.toLowerCase().includes(query));
         
-        return matchesTitle || matchesName || matchesTags;
+        return matchesTitle || matchesTags;
       }
 
       return true;
@@ -206,11 +205,6 @@ export default function ZonePlanModal({
                             {zone.title}
                           </span>
                         </div>
-                        {zone.name && (
-                          <p className="text-sm text-[var(--color-text-muted)] truncate">
-                            {zone.name}
-                          </p>
-                        )}
                         {zone.tags && zone.tags.length > 0 && (
                           <div className="flex items-center gap-1 mt-1.5 flex-wrap">
                             <Tag className="w-3 h-3 text-[var(--color-text-light)]" />

@@ -68,68 +68,68 @@ export default function Home() {
     <main className="relative w-screen h-screen overflow-hidden" style={{ background: '#1a2332' }}>
       {/* ── Header ── */}
       <header
-        className="absolute top-0 left-0 right-0 z-[1001] flex items-center justify-between px-4 py-3 safe-top"
+        className="absolute top-0 left-0 right-0 z-[1001] flex items-center justify-between px-2 sm:px-4 py-2.5 sm:py-3 safe-top gap-2"
         style={{
           background: 'linear-gradient(to bottom, rgba(0,95,115,0.97) 0%, rgba(0,95,115,0.82) 100%)',
           backdropFilter: 'blur(8px)',
           boxShadow: '0 2px 16px rgba(0,0,0,0.25)',
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 min-w-0 flex-shrink">
           <div
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: 'rgba(148,210,189,0.25)' }}
           >
             <Leaf className="w-4 h-4 text-[var(--color-accent)]" />
           </div>
-          <span className="text-white font-bold text-base tracking-tight hidden xs:inline">
+          <span className="text-white font-bold text-sm sm:text-base tracking-tight hidden xs:inline truncate">
             LandscapeManager
           </span>
-          <span className="text-white font-bold text-base tracking-tight xs:hidden">
-            Landscape
+          <span className="text-white font-bold text-sm sm:text-base tracking-tight xs:hidden truncate">
+            LM
           </span>
         </div>
 
-        <nav className="flex items-center gap-1.5">
+        <nav className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           <Link
             href="/week"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="Week overzicht"
           >
-            <CalendarRange className="w-4 h-4" />
-            <span className="hidden sm:inline">Week</span>
+            <CalendarRange className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Week</span>
           </Link>
           <Link
             href="/plan"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="Dagplanning"
           >
-            <CalendarDays className="w-4 h-4" />
-            <span className="hidden sm:inline">Planning</span>
+            <CalendarDays className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Planning</span>
           </Link>
           <Link
             href="/routes"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="hidden xs:flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="Punten en routes"
           >
-            <Route className="w-4 h-4" />
-            <span className="hidden sm:inline">Routes</span>
+            <Route className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Routes</span>
           </Link>
           
           {/* Analytics Dropdown */}
           <div className="relative">
             <button
               onClick={() => setShowAnalyticsDropdown(!showAnalyticsDropdown)}
-              className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
               style={{ background: 'rgba(255,255,255,0.12)' }}
               aria-label="Analytics menu"
             >
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Analytics</span>
-              <ChevronDown className="w-3.5 h-3.5" />
+              <TrendingUp className="w-4 h-4 flex-shrink-0" />
+              <span className="hidden lg:inline">Analytics</span>
+              <ChevronDown className="w-3.5 h-3.5 hidden md:inline flex-shrink-0" />
             </button>
             
             {showAnalyticsDropdown && (
@@ -182,12 +182,12 @@ export default function Home() {
 
           <Link
             href="/admin/zones"
-            className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px]"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
             style={{ background: 'rgba(255,255,255,0.12)' }}
             aria-label="Beheerpaneel"
           >
-            <Settings className="w-4 h-4" />
-            <span className="hidden sm:inline">Beheer</span>
+            <Settings className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Beheer</span>
           </Link>
         </nav>
       </header>

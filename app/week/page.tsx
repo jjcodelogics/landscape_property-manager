@@ -5,16 +5,15 @@ import { TaskWithZone, PlannedTaskWithZone, DayConfig, TaskType, ZoneType } from
 import { ArrowLeft, ChevronLeft, ChevronRight, Calendar, Scissors, Trash2, Wrench, Plus, X, Users, Clock, Edit2, Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import ZonePlanModal from '@/components/ZonePlanModal';
+import PlannedTaskEditModal from '@/components/PlannedTaskEditModal';
 
 const TASK_TYPE_CONFIG: Record<TaskType, { label: string; icon: React.ReactNode; color: string }> = {
   mowing:      { label: 'Maaien',     icon: <Scissors className="w-4 h-4" />, color: 'text-green-600' },
-  waste:       { label: 'Afval',      icon: <Trash2   className="w-4 h-4" />, color: 'text-blue-600' },
   maintenance: { label: 'Onderhoud', icon: <Wrench   className="w-4 h-4" />, color: 'text-orange-600' },
 };
 
 const ZONE_TYPE_COLORS: Record<ZoneType, string> = {
   grass:       'bg-[var(--color-zone-grass)]',
-  waste:       'bg-[var(--color-zone-waste)]',
   maintenance: 'bg-[var(--color-zone-maintenance)]',
 };
 
@@ -30,6 +29,7 @@ interface DayData {
   plannedTasks: PlannedTaskWithZone[];
   totalMinutes: number;
   totalPlannedMinutes: number;
+  totalPlannedWorkload: number;
 }
 
 export default function WeekCalendarPage() {
@@ -42,6 +42,8 @@ export default function WeekCalendarPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => getWeekStart(new Date()));
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [selectedDateForPlan, setSelectedDateForPlan] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedPlannedTask, setSelectedPlannedTask] = useState<PlannedTaskWithZone | null>(null);
 
   useEffect(() => {
     fetchWeekTasks();
@@ -52,7 +54,8 @@ export default function WeekCalendarPage() {
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+    // Adjust to Monday: if Sunday (0), go back 6 days; otherwise go back to Monday
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     d.setDate(diff);
     d.setHours(0, 0, 0, 0);
     return d;
@@ -147,6 +150,10 @@ export default function WeekCalendarPage() {
       // Calculate total minutes
       const totalMinutes = dayTasks.reduce((sum, task) => sum + task.duration_minutes, 0);
       const totalPlannedMinutes = dayPlannedTasks.reduce((sum, planned) => sum + planned.estimated_minutes, 0);
+      const totalPlannedWorkload = dayPlannedTasks.reduce((sum, planned) => {
+        const teamMembers = planned.team_members || 1;
+        return sum + (planned.estimated_minutes * teamMembers);
+      }, 0);
 
       data.push({
         date,
@@ -157,6 +164,7 @@ export default function WeekCalendarPage() {
         plannedTasks: dayPlannedTasks,
         totalMinutes,
         totalPlannedMinutes,
+        totalPlannedWorkload,
       });
     }
 
@@ -230,6 +238,57 @@ export default function WeekCalendarPage() {
     }
   };
 
+  const handleEditPlanned = (plannedTask: PlannedTaskWithZone) => {
+    setSelectedPlannedTask(plannedTask);
+    setShowEditModal(true);
+  };
+
+  const handleSavePlannedTask = async (
+    id: string,
+    updates: {
+      estimated_minutes?: number;
+      team_members?: number;
+      notes?: string;
+    }
+  ) => {
+    try {
+      const response = await fetch(`/api/planned-tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update planned task');
+      }
+
+      // Refresh planned tasks
+      await fetchPlannedTasks();
+    } catch (err) {
+      console.error('Error updating planned task:', err);
+      throw err; // Re-throw to let modal handle the error
+    }
+  };
+
+  const handleDeletePlannedFromModal = async (id: string) => {
+    try {
+      const response = await fetch(`/api/planned-tasks/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete planned task');
+      }
+
+      // Refresh planned tasks
+      await fetchPlannedTasks();
+    } catch (err) {
+      console.error('Error deleting planned task:', err);
+      throw err; // Re-throw to let modal handle the error
+    }
+  };
+
   const handleUpdateDayConfig = async (dateStr: string, teamMembers: number, hoursPerMember: number) => {
     try {
       const response = await fetch('/api/day-config', {
@@ -291,50 +350,53 @@ export default function WeekCalendarPage() {
     <div className="min-h-screen bg-[var(--color-bg)] pb-20">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-        <div className="px-4 py-3 flex items-center gap-3">
+        <div className="px-3 sm:px-4 py-3 flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => router.back()}
-            className="p-2 -ml-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors"
+            className="p-2 -ml-2 rounded-full hover:bg-[var(--color-bg)] active:bg-[var(--color-border)] transition-colors flex-shrink-0"
             aria-label="Terug"
           >
             <ArrowLeft className="w-5 h-5 text-[var(--color-text)]" />
           </button>
-          <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-[var(--color-primary)]" />
-            <h1 className="text-lg font-semibold text-[var(--color-text)]">Week Overzicht</h1>
+          <div className="flex items-center gap-2 min-w-0">
+            <Calendar className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+            <h1 className="text-base sm:text-lg font-semibold text-[var(--color-text)] truncate">Week Overzicht</h1>
           </div>
         </div>
 
         {/* Week Navigation */}
-        <div className="px-4 py-3 flex items-center justify-between border-t border-[var(--color-border)]">
+        <div className="px-2 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 border-t border-[var(--color-border)]">
+          {/* Previous Week Button */}
           <button
             onClick={handlePreviousWeek}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-[var(--color-bg)] hover:bg-[var(--color-border)] active:bg-[var(--color-border)] transition-colors"
+            className="flex items-center justify-center gap-1 px-2.5 sm:px-3 py-2 rounded-lg bg-[var(--color-bg)] hover:bg-[var(--color-border)] active:bg-[var(--color-border)] transition-colors min-h-[40px] min-w-[40px] sm:min-w-0"
             aria-label="Vorige week"
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Vorige</span>
+            <ChevronLeft className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden sm:inline text-sm font-medium">Vorige</span>
           </button>
 
-          <div className="flex flex-col items-center">
-            <div className="text-sm font-semibold text-[var(--color-text)]">{weekLabel}</div>
+          {/* Week Label & Today Button */}
+          <div className="flex flex-col items-center justify-center min-w-0 flex-1">
+            <div className="text-sm sm:text-base font-semibold text-[var(--color-text)] whitespace-nowrap">{weekLabel}</div>
             {!isCurrentWeek && (
               <button
                 onClick={handleToday}
-                className="text-xs text-[var(--color-primary)] hover:underline mt-0.5"
+                className="text-xs text-[var(--color-primary)] hover:underline mt-0.5 whitespace-nowrap"
               >
-                Deze week
+                Vandaag
               </button>
             )}
           </div>
 
+          {/* Next Week Button */}
           <button
             onClick={handleNextWeek}
-            className="flex items-center gap-1 px-3 py-2 rounded-lg bg-[var(--color-bg)] hover:bg-[var(--color-border)] active:bg-[var(--color-border)] transition-colors"
+            className="flex items-center justify-center gap-1 px-2.5 sm:px-3 py-2 rounded-lg bg-[var(--color-bg)] hover:bg-[var(--color-border)] active:bg-[var(--color-border)] transition-colors min-h-[40px] min-w-[40px] sm:min-w-0"
             aria-label="Volgende week"
           >
-            <span className="text-sm font-medium">Volgende</span>
-            <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline text-sm font-medium">Volgende</span>
+            <ChevronRight className="w-4 h-4 flex-shrink-0" />
           </button>
         </div>
       </div>
@@ -348,6 +410,7 @@ export default function WeekCalendarPage() {
               day={day} 
               formatDuration={formatDuration}
               onAddPlan={handleAddPlan}
+              onEditPlanned={handleEditPlanned}
               onDeletePlanned={handleDeletePlanned}
             />
           ))}
@@ -362,6 +425,7 @@ export default function WeekCalendarPage() {
             day={day} 
             formatDuration={formatDuration}
             onAddPlan={handleAddPlan}
+            onEditPlanned={handleEditPlanned}
             onDeletePlanned={handleDeletePlanned}
           />
         ))}
@@ -382,6 +446,18 @@ export default function WeekCalendarPage() {
             : []
         }
       />
+
+      {/* Planned Task Edit Modal */}
+      <PlannedTaskEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPlannedTask(null);
+        }}
+        plannedTask={selectedPlannedTask}
+        onSave={handleSavePlannedTask}
+        onDelete={handleDeletePlannedFromModal}
+      />
     </div>
   );
 }
@@ -391,10 +467,11 @@ interface DayCardProps {
   day: DayData;
   formatDuration: (minutes: number) => string;
   onAddPlan: (dateStr: string) => void;
+  onEditPlanned: (planned: PlannedTaskWithZone) => void;
   onDeletePlanned: (id: string) => void;
 }
 
-function DayCard({ day, formatDuration, onAddPlan, onDeletePlanned }: DayCardProps) {
+function DayCard({ day, formatDuration, onAddPlan, onEditPlanned, onDeletePlanned }: DayCardProps) {
   const isToday = useMemo(() => {
     const today = new Date();
     return day.date.toDateString() === today.toDateString();
@@ -423,11 +500,14 @@ function DayCard({ day, formatDuration, onAddPlan, onDeletePlanned }: DayCardPro
           <div className="text-right">
             {day.totalPlannedMinutes > 0 && (
               <div className="text-xs text-[var(--color-text-muted)]">
-                Plan: {formatDuration(day.totalPlannedMinutes)}
+                <div>Duur: {formatDuration(day.totalPlannedMinutes)}</div>
+                {day.totalPlannedWorkload !== day.totalPlannedMinutes && (
+                  <div className="font-semibold text-blue-600">Werk: {formatDuration(day.totalPlannedWorkload)}</div>
+                )}
               </div>
             )}
             {day.totalMinutes > 0 && (
-              <div className="text-sm font-semibold text-[var(--color-success)]">
+              <div className="text-sm font-semibold text-[var(--color-success)] mt-1">
                 ✓ {formatDuration(day.totalMinutes)}
               </div>
             )}
@@ -451,6 +531,7 @@ function DayCard({ day, formatDuration, onAddPlan, onDeletePlanned }: DayCardPro
                   key={planned.id} 
                   planned={planned} 
                   formatDuration={formatDuration}
+                  onEdit={onEditPlanned}
                   onDelete={onDeletePlanned}
                 />
               ))}
@@ -499,7 +580,7 @@ interface TaskCardProps {
 
 function TaskCard({ task, formatDuration }: TaskCardProps) {
   const taskConfig = TASK_TYPE_CONFIG[task.task_type];
-  const zoneName = task.zones?.title || task.zones?.name || 'Onbekend';
+  const zoneName = task.zones?.title || 'Onbekend';
   const zoneType = task.zones?.type || 'grass';
   const zoneColor = ZONE_TYPE_COLORS[zoneType];
 
@@ -528,17 +609,23 @@ function TaskCard({ task, formatDuration }: TaskCardProps) {
 interface PlannedTaskCardProps {
   planned: PlannedTaskWithZone;
   formatDuration: (minutes: number) => string;
+  onEdit: (planned: PlannedTaskWithZone) => void;
   onDelete: (plannedId: string) => void;
 }
 
-function PlannedTaskCard({ planned, formatDuration, onDelete }: PlannedTaskCardProps) {
-  const zoneName = planned.zones?.title || planned.zones?.name || 'Onbekend';
+function PlannedTaskCard({ planned, formatDuration, onEdit, onDelete }: PlannedTaskCardProps) {
+  const zoneName = planned.zones?.title || 'Onbekend';
   const zoneType = planned.zones?.type || 'grass';
   const zoneColor = ZONE_TYPE_COLORS[zoneType];
-  const typeConfig = TASK_TYPE_CONFIG[zoneType === 'grass' ? 'mowing' : zoneType === 'waste' ? 'waste' : 'maintenance'];
+  const typeConfig = TASK_TYPE_CONFIG[zoneType === 'grass' ? 'mowing' : 'maintenance'];
+  const teamMembers = planned.team_members || 1;
+  const workloadMinutes = planned.estimated_minutes * teamMembers;
 
   return (
-    <div className="flex items-start gap-2 p-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)] transition-colors group">
+    <div 
+      onClick={() => onEdit(planned)}
+      className="flex items-start gap-2 p-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] hover:border-[var(--color-primary)] hover:shadow-sm transition-all group cursor-pointer"
+    >
       {/* Zone Color Indicator */}
       <div className={`w-1 h-full ${zoneColor} rounded-full flex-shrink-0 mt-1`} />
 
@@ -549,9 +636,21 @@ function PlannedTaskCard({ planned, formatDuration, onDelete }: PlannedTaskCardP
           <span className="text-sm font-medium text-[var(--color-text)] truncate">{zoneName}</span>
         </div>
         <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
-          <span>Geschat</span>
-          <span>•</span>
-          <span className="font-medium">{formatDuration(planned.estimated_minutes)}</span>
+          <span className="flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            <span className="font-medium">{formatDuration(planned.estimated_minutes)}</span>
+          </span>
+          {teamMembers > 1 && (
+            <>
+              <span>•</span>
+              <span className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                <span>{teamMembers}</span>
+              </span>
+              <span>•</span>
+              <span className="font-semibold text-blue-600">{formatDuration(workloadMinutes)} werklast</span>
+            </>
+          )}
         </div>
       </div>
 

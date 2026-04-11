@@ -25,17 +25,15 @@ const INSTRUCTIONS_TEMPLATE = `## Taken
 
 interface ZoneFormData {
   title: string;
-  name: string;
   type: ZoneType;
   instructions: string;
   tags: string[];
   last_worked_at: string;
-  next_scheduled_work: string;
+  frequency: string;
 }
 
 const ZONE_TYPE_OPTIONS: { value: ZoneType; label: string; badge: string }[] = [
   { value: 'grass',       label: 'Grasonderhoud',       badge: 'badge-grass' },
-  { value: 'waste',       label: 'Afvalbeheer',        badge: 'badge-waste' },
   { value: 'maintenance', label: 'Onderhoud',  badge: 'badge-maintenance' },
 ];
 
@@ -63,12 +61,11 @@ export default function AdminZonesPage() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<ZoneFormData>({
     title: '',
-    name: '',
     type: 'grass',
     instructions: '',
     tags: [],
     last_worked_at: '',
-    next_scheduled_work: '',
+    frequency: '',
   });
   const [tagInput, setTagInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -122,12 +119,11 @@ export default function AdminZonesPage() {
     setEditingZone(null);
     setFormData({ 
       title: '', 
-      name: '', 
       type: 'grass', 
       instructions: INSTRUCTIONS_TEMPLATE,
       tags: [],
       last_worked_at: '',
-      next_scheduled_work: '',
+      frequency: '',
     });
     setTagInput('');
   };
@@ -147,12 +143,11 @@ export default function AdminZonesPage() {
     setDrawnGeojson(zone.geojson);
     setFormData({
       title: zone.title,
-      name: zone.name || '',
       type: zone.type,
       instructions: zone.instructions || '',
       tags: zone.tags || [],
       last_worked_at: zone.last_worked_at ? zone.last_worked_at.slice(0, 16) : '',
-      next_scheduled_work: zone.next_scheduled_work ? zone.next_scheduled_work.slice(0, 16) : '',
+      frequency: zone.frequency || '',
     });
     setTagInput('');
     setShowForm(true);
@@ -203,10 +198,15 @@ export default function AdminZonesPage() {
 
     try {
       const res = await fetch(`/api/zones/${zoneId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Mislukt om te verwijderen');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(data.error || `HTTP ${res.status}: Failed to delete zone`);
+      }
       await loadZones();
-    } catch {
-      alert('Mislukt om zone te verwijderen');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Mislukt om zone te verwijderen';
+      alert(`Fout bij verwijderen: ${errorMessage}`);
+      console.error('Delete zone error:', err);
     } finally {
       setDeletingId(null);
     }
@@ -319,6 +319,7 @@ export default function AdminZonesPage() {
         <div className="relative h-64 sm:h-80 lg:h-auto lg:flex-1">
           <AdminMap
             zones={zones}
+            points={points}
             onPolygonDrawn={handlePolygonDrawn}
             editingGeojson={editingZone ? editingZone.geojson : null}
             onMarkerPlaced={handleMarkerPlaced}
@@ -358,22 +359,9 @@ export default function AdminZonesPage() {
 
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                    Naam
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, name: e.target.value }))}
-                    className="input"
-                    placeholder="bijv. Noord Ingang Gazon"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
                     Zonetype
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {ZONE_TYPE_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
@@ -473,14 +461,18 @@ export default function AdminZonesPage() {
 
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] mb-2">
-                      Volgend Gepland Werk
+                      Frequentie
                     </label>
-                    <input
-                      type="datetime-local"
-                      value={formData.next_scheduled_work}
-                      onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, next_scheduled_work: e.target.value }))}
+                    <select
+                      value={formData.frequency}
+                      onChange={(e) => setFormData((p: ZoneFormData) => ({ ...p, frequency: e.target.value }))}
                       className="input"
-                    />
+                    >
+                      <option value="">Geen vaste indeling</option>
+                      <option value="weekly">Wekelijks</option>
+                      <option value="biweekly">Om de week</option>
+                      <option value="monthly">Maandelijks</option>
+                    </select>
                   </div>
                 </div>
 
@@ -630,9 +622,6 @@ export default function AdminZonesPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <p className="font-semibold text-[var(--color-text)] truncate">{zone.title}</p>
-                        {zone.name && (
-                          <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">{zone.name}</p>
-                        )}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${badge}`}>
                             {zone.type}
