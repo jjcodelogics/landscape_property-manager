@@ -610,9 +610,6 @@ export default function AdminZonesPage() {
                   const lastWorked = zone.last_worked_at 
                     ? new Date(zone.last_worked_at).toLocaleDateString() 
                     : null;
-                  const nextWork = zone.next_scheduled_work 
-                    ? new Date(zone.next_scheduled_work).toLocaleDateString() 
-                    : null;
                   
                   return (
                     <li
@@ -634,11 +631,6 @@ export default function AdminZonesPage() {
                           {lastWorked && (
                             <span className="text-xs text-[var(--color-text-muted)]">
                               Laatst: {lastWorked}
-                            </span>
-                          )}
-                          {nextWork && (
-                            <span className="text-xs text-[var(--color-secondary)] font-medium">
-                              Volgend: {nextWork}
                             </span>
                           )}
                         </div>
