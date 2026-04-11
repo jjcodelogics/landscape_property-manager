@@ -606,7 +606,7 @@ export default function AdminZonesPage() {
             ) : (
               <ul className="space-y-2">
                 {zones.map((zone: Zone) => {
-                  const badge = zone.type === 'grass' ? 'badge-grass' : zone.type === 'waste' ? 'badge-waste' : 'badge-maintenance';
+                  const badge = zone.type === 'grass' ? 'badge-grass' : 'badge-maintenance';
                   const lastWorked = zone.last_worked_at 
                     ? new Date(zone.last_worked_at).toLocaleDateString() 
                     : null;
