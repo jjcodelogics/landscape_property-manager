@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Zone } from '@/lib/types';
 import { getZoneColorByLastWorked } from '@/lib/zone-colors';
+import { useUserLocation } from '@/lib/useUserLocation';
 
 interface MapProps {
   zones: Zone[];
@@ -16,6 +17,11 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const layersRef = useRef<Record<string, L.GeoJSON>>({});
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const accuracyCircleRef = useRef<L.Circle | null>(null);
+  const [hasInitiallycentered, setHasInitiallyCenter] = useState(false);
+  
+  const { position, error: locationError } = useUserLocation();
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -108,5 +114,108 @@ export default function Map({ zones, selectedZoneId, onZoneClick }: MapProps) {
     }
   }, [zones, selectedZoneId, onZoneClick]);
 
-  return <div ref={mapContainerRef} className="w-full h-full" />;
+  // Handle user location updates
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !position) return;
+
+    // Create custom blue dot icon for user location
+    const userIcon = L.divIcon({
+      className: 'user-location-marker',
+      html: `
+        <div style="
+          width: 20px;
+          height: 20px;
+          background-color: #4285F4;
+          border: 3px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        "></div>
+      `,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+
+    const userLatLng = L.latLng(position.latitude, position.longitude);
+
+    // Update or create user marker
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setLatLng(userLatLng);
+    } else {
+      userMarkerRef.current = L.marker(userLatLng, { 
+        icon: userIcon,
+        zIndexOffset: 1000, // Keep user marker on top
+      }).addTo(map);
+    }
+
+    // Update or create accuracy circle
+    if (accuracyCircleRef.current) {
+      accuracyCircleRef.current.setLatLng(userLatLng);
+      accuracyCircleRef.current.setRadius(position.accuracy);
+    } else {
+      accuracyCircleRef.current = L.circle(userLatLng, {
+        radius: position.accuracy,
+        color: '#4285F4',
+        fillColor: '#4285F4',
+        fillOpacity: 0.15,
+        weight: 1,
+      }).addTo(map);
+    }
+
+    // Center on user location only on first load
+    if (!hasInitiallycentered) {
+      map.setView(userLatLng, 18);
+      setHasInitiallyCenter(true);
+    }
+  }, [position, hasInitiallycentered]);
+
+  // Cleanup user location markers on unmount
+  useEffect(() => {
+    return () => {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      if (accuracyCircleRef.current) {
+        accuracyCircleRef.current.remove();
+        accuracyCircleRef.current = null;
+      }
+    };
+  }, []);
+
+  // Function to center map on user location
+  const centerOnUserLocation = () => {
+    const map = mapRef.current;
+    if (!map || !position) return;
+    
+    map.setView(L.latLng(position.latitude, position.longitude), 18, {
+      animate: true,
+      duration: 0.5,
+    });
+  };
+
+  return (
+    <div className="relative w-full h-full">
+      <div ref={mapContainerRef} className="w-full h-full" />
+      
+      {/* Center on Me button */}
+      {position && (
+        <button
+          onClick={centerOnUserLocation}
+          className="absolute bottom-6 right-6 bg-white hover:bg-gray-50 text-gray-800 font-semibold py-3 px-4 rounded-lg shadow-lg border border-gray-300 flex items-center gap-2 z-[1000] touch-manipulation min-h-[48px]"
+          aria-label="Center map on my location"
+        >
+          <span className="text-xl">📍</span>
+          <span>Center on Me</span>
+        </button>
+      )}
+      
+      {/* Location error message */}
+      {locationError && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg shadow-md z-[1000]">
+          {locationError}
+        </div>
+      )}
+    </div>
+  );
 }
