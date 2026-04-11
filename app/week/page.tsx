@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { TaskWithZone, PlannedTaskWithZone, DayConfig, TaskType, ZoneType } from '@/lib/types';
-import { ArrowLeft, ChevronLeft, ChevronRight, Calendar, Scissors, Trash2, Wrench, Plus, X, Users, Clock, Edit2, Check } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Calendar, Scissors, Trash2, Wrench, Plus, X, Users, Clock, Edit2, Check, Swords } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import ZonePlanModal from '@/components/ZonePlanModal';
 import PlannedTaskEditModal from '@/components/PlannedTaskEditModal';
 
@@ -362,6 +363,14 @@ export default function WeekCalendarPage() {
             <Calendar className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
             <h1 className="text-base sm:text-lg font-semibold text-[var(--color-text)] truncate">Week Overzicht</h1>
           </div>
+          <Link
+            href="/today"
+            className="ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold text-white touch-manipulation flex-shrink-0"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <Swords className="w-4 h-4" />
+            <span className="hidden xs:inline">Attackplan</span>
+          </Link>
         </div>
 
         {/* Week Navigation */}

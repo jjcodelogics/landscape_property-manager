@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import TaskForm from '@/components/TaskForm';
 import ZoneInstructionsGenerator from '@/components/ZoneInstructionsGenerator';
 import { Zone } from '@/lib/types';
-import { BarChart2, Settings, Leaf, CalendarDays, Route, TrendingUp, FileText, ChevronDown, CalendarRange } from 'lucide-react';
+import { BarChart2, Settings, Leaf, CalendarDays, Route, TrendingUp, FileText, ChevronDown, CalendarRange, Swords } from 'lucide-react';
 import Link from 'next/link';
 import { getZoneColorLegend } from '@/lib/zone-colors';
 
@@ -91,6 +91,15 @@ export default function Home() {
         </div>
 
         <nav className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          <Link
+            href="/today"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
+            style={{ background: 'rgba(148,210,189,0.25)' }}
+            aria-label="Attackplan vandaag"
+          >
+            <Swords className="w-4 h-4 flex-shrink-0" />
+            <span className="hidden md:inline">Vandaag</span>
+          </Link>
           <Link
             href="/week"
             className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-2 rounded-xl text-sm font-semibold text-white transition-all touch-manipulation min-h-[40px] min-w-[40px] justify-center"
