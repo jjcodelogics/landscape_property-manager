@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data, error: dbError } = await supabase
       .from('zones')
-      .select('id, title, type, instructions, geojson, area_m2, tags, last_worked_at, next_scheduled_work, frequency, created_at')
+      .select('*')
       .order('title');
 
     if (dbError) {

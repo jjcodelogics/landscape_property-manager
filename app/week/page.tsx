@@ -63,7 +63,7 @@ export default function WeekCalendarPage() {
 
   function getWeekEnd(weekStart: Date): Date {
     const end = new Date(weekStart);
-    end.setDate(end.getDate() + 6);
+    end.setDate(end.getDate() + 4);
     end.setHours(23, 59, 59, 999);
     return end;
   }
@@ -133,7 +133,7 @@ export default function WeekCalendarPage() {
   const weeklyData = useMemo(() => {
     const data: DayData[] = [];
     
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 5; i++) {
       const date = new Date(currentWeekStart);
       date.setDate(date.getDate() + i);
       const dateStr = formatDateForAPI(date);
@@ -476,7 +476,6 @@ function DayCard({ day, formatDuration, onAddPlan, onEditPlanned, onDeletePlanne
     const today = new Date();
     return day.date.toDateString() === today.toDateString();
   }, [day.date]);
-  const isWeekend = day.date.getDay() === 0 || day.date.getDay() === 6;
   const hasPlannedTasks = day.plannedTasks.length > 0;
   const hasCompletedTasks = day.tasks.length > 0;
 
@@ -490,7 +489,7 @@ function DayCard({ day, formatDuration, onAddPlan, onEditPlanned, onDeletePlanne
       <div className={`p-3 border-b border-[var(--color-border)] ${isToday ? 'bg-[var(--color-primary)] bg-opacity-5' : ''}`}>
         <div className="flex items-baseline justify-between">
           <div>
-            <div className={`text-xs font-medium ${isWeekend ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text-light)]'}`}>
+            <div className="text-xs font-medium text-[var(--color-text-light)]">
               {day.dayNameFull}
             </div>
             <div className={`text-lg font-semibold ${isToday ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)]'}`}>

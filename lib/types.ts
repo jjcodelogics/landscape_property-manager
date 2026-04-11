@@ -19,7 +19,7 @@ export interface Zone {
   tags: string[];
   last_worked_at: string | null;
   next_scheduled_work: string | null;
-  frequency: string | null;
+  frequency?: string | null;
   created_at: string;
 }
 
